@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>失物找寻 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
+            <div class="back-to-home-btn">
+                <div class="nav-icon">
+                    <a href="index.html" title="首页">🏠</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="found.html" title="失物招领">🔍</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="lost.html" title="失物找寻">📢</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="forum.html" title="社区论坛">💬</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="locker.html" title="智能存储柜">📦</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="feedback.html" title="意见反馈">📝</a>
+                </div>
+            </div>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>📢 失物找寻 <span class="subtitle">查看和发布丢失物品信息，帮助主人找到失物</span></h1>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <button class="btn btn-secondary" onclick="window.location.href='login.html'">登录 / 注册</button>
+                </div>
+                <div class="user-dropdown" id="userDropdown" style="display: none;">
+                    <div class="user-dropdown-btn">
+                        <span class="user-icon">👤</span>
+                        <span class="user-name" id="userName">用户名</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="user-dropdown-menu">
+                        <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                            <span class="dropdown-icon">👤</span>
+                            <span>个人中心</span>
+                        </div>
+                        <div class="dropdown-item" onclick="window.location.href='chat.html'">
+                            <span class="dropdown-icon">💬</span>
+                            <span>聊天</span>
+                            <span class="notification-badge-small" id="chatBadge" style="display: none;">0</span>
+                        </div>
+                        <div class="dropdown-item" onclick="window.location.href='notifications.html'">
+                            <span class="dropdown-icon">🔔</span>
+                            <span>消息</span>
+                            <span class="notification-badge-small" id="dropdownNotificationBadge" style="display: none;">0</span>
+                        </div>
+                        <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                            <span class="dropdown-icon">⚙️</span>
+                            <span>设置</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item danger" onclick="logout()">
+                            <span class="dropdown-icon">🚪</span>
+                            <span>退出登录</span>
+                        </div>
+
+                    </div>
+        </header>
+
+
+
+        <div class="main-content">
+            <!-- 物品列表区域 -->
+            <div class="items-section">
+                <div class="section-header">
+                    <h2>📋 找寻物品列表</h2>
+
+                </div>
+                <div class="items-list" id="lostItemsList">
+                    <div class="loading">加载中...</div>
+                </div>
+                <div class="section-footer">
+                    <button class="btn btn-primary" onclick="window.location.href='publish_lost.html'">
+                        <span class="btn-icon">➕</span>
+                        发布找寻信息
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <script src="script.js"></script>
+        <script>
+            // 页面加载时加载找寻物品列表
+            document.addEventListener('DOMContentLoaded', () => {
+                loadPageItems('lost');
+            });
+        </script>
+</body>
+
+</html>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园失物招领系统 - 首页</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="smart-match-styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 右上角登录/注册按钮（固定位置） -->
+        <div class="top-right-auth">
+            <div class="user-info" id="userInfo">
+                <button class="btn btn-secondary btn-login" onclick="window.location.href='login.html'">登录 / 注册</button>
+            </div>
+
+            <div class="user-dropdown" id="userDropdown" style="display: none;">
+                <div class="user-dropdown-btn">
+                    <span class="user-icon">👤</span>
+                    <span class="user-name" id="userName">用户名</span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="user-dropdown-menu">
+                    <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                        <span class="dropdown-icon">👤</span>
+                        <span>个人中心</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='chat.html'">
+                        <span class="dropdown-icon">💬</span>
+                        <span>聊天</span>
+                        <span class="notification-badge-small" id="chatBadge" style="display: none;">0</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='notifications.html'">
+                        <span class="dropdown-icon">🔔</span>
+                        <span>消息</span>
+                        <span class="notification-badge-small" id="dropdownNotificationBadge" style="display: none;">0</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                        <span class="dropdown-icon">⚙️</span>
+                        <span>设置</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item danger" onclick="logout()">
+                        <span class="dropdown-icon">🚪</span>
+                        <span>退出登录</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <header>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🎒 校园失物招领系统 <span class="subtitle">帮助失物找到主人，让爱心传递</span></h1>
+                </div>
+        </header>
+
+        <!-- 顶部导航菜单 -->
+        <nav class="nav-menu">
+            <div class="nav-items">
+                <a href="index.html" class="nav-item active">🏠 首页</a>
+                <a href="found.html" class="nav-item">🔍 失物招领</a>
+                <a href="lost.html" class="nav-item">📢 失物找寻</a>
+                <a href="image-match.html" class="nav-item">🖼️ AI图片匹配</a>
+                <a href="forum.html" class="nav-item">💬 社区交流</a>
+                <a href="locker.html" class="nav-item">📦 智能存储柜</a>
+                <a href="feedback.html" class="nav-item">📝 意见反馈</a>
+            </div>
+            <div class="nav-search">
+                <input type="text" id="navSearchInput" class="nav-search-input" placeholder="搜索..." readonly />
+                <button class="nav-search-btn">🔍</button>
+            </div>
+        </nav>
+
+        <script>
+            // 导航栏搜索框功能
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('navSearchInput');
+                const searchBtn = document.querySelector('.nav-search-btn');
+
+                // 点击输入框跳转到搜索页面
+                searchInput.addEventListener('click', function() {
+                    window.location.href = 'search-results.html';
+                });
+
+                // 点击搜索按钮跳转到搜索页面
+                searchBtn.addEventListener('click', function() {
+                    window.location.href = 'search-results.html';
+                });
+            });
+        </script>
+
+        <div class="main-content">
+            <!-- 首页主内容区域：2x2网格布局 -->
+            <div class="home-grid">
+                <!-- 左上：重要推送 -->
+                <div class="home-grid-item notification-section">
+                    <h2>📢 重要推送</h2>
+                    <div id="notificationList" class="notification-list">
+                        <div class="loading">加载中...</div>
+                    </div>
+                </div>
+
+                <!-- 右上：热门帖子 -->
+                <div class="home-grid-item hot-posts-section">
+                    <h2>🔥 热门帖子</h2>
+                    <div id="hotPostsList" class="hot-posts-list">
+                        <div class="loading">加载中...</div>
+                    </div>
+                </div>
+
+                <!-- 左下：热门招领 -->
+                <div class="home-grid-item items-showcase-section">
+                    <h2>🔥 热门招领</h2>
+
+                    <div id="foundItemsList" class="items-showcase-list">
+                        <div class="loading">加载中...</div>
+                    </div>
+                </div>
+
+                <!-- 右下：热门找寻 -->
+                <div class="home-grid-item items-showcase-section">
+                    <h2>📢 热门找寻</h2>
+
+                    <div id="lostItemsList" class="items-showcase-list">
+                        <div class="loading">加载中...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 快速入口（无背景样式） -->
+            <div class="quick-access-simple">
+                <div class="quick-access-buttons">
+                    <a href="publish_lost.html" class="quick-btn-simple">
+                        <span class="btn-icon">🔍</span>
+                        <span class="btn-text">发布寻物</span>
+                    </a>
+                    <a href="publish_found.html" class="quick-btn-simple">
+                        <span class="btn-icon">📦</span>
+                        <span class="btn-text">发布招领</span>
+                    </a>
+                    <a href="items.html" class="quick-btn-simple">
+                        <span class="btn-icon">📋</span>
+                        <span class="btn-text">查看物品</span>
+                    </a>
+                    <a href="chat.html" class="quick-btn-simple">
+                        <span class="btn-icon">💭</span>
+                        <span class="btn-text">聊天</span>
+                    </a>
+                    <a href="settings.html" class="quick-btn-simple">
+                        <span class="btn-icon">⚙️</span>
+                        <span class="btn-text">设置</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 系统统计（横向排列在底部） -->
+            <div class="home-stats-section">
+                <h3>📊 系统统计</h3>
+                <div class="home-stats-grid">
+                    <div class="home-stat-item">
+                        <div class="stat-number" id="statFound">0</div>
+                        <div class="stat-label">招领物品</div>
+                    </div>
+                    <div class="home-stat-item">
+                        <div class="stat-number" id="statLost">0</div>
+                        <div class="stat-label">找寻物品</div>
+                    </div>
+                    <div class="home-stat-item">
+                        <div class="stat-number" id="statPosts">0</div>
+                        <div class="stat-label">社区帖子</div>
+                    </div>
+                    <div class="home-stat-item">
+                        <div class="stat-number" id="statUsers">0</div>
+                        <div class="stat-label">注册用户</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[主页] DOM加载完成，开始初始化');
+            loadStats();
+            loadHotPosts();
+            loadSystemNotifications();
+            loadFoundItems();
+            loadLostItems();
+            checkLoginStatus();
+        });
+
+        // 加载系统推送(重要推送)
+        async function loadSystemNotifications() {
+            const container = document.getElementById('notificationList');
+            try {
+                const response = await fetch('/api/system-notifications');
+                console.log('[推送] 响应状态:', response.status);
+                const notifications = await response.json();
+                console.log('[推送] 数据:', notifications);
+
+                if (notifications.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="padding: 20px; text-align: center; color: rgba(255,255,255,0.7);">
+                            <div style="font-size: 40px; margin-bottom: 10px;">📢</div>
+                            <p>暂无推送消息</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = notifications.map(notif => `
+                    <div class="notification-item" onclick="openNotificationDetail(${notif.id})" style="cursor: pointer;">
+                        <div class="notification-title">
+                            <span class="notification-tag">${escapeHtml(notif.tag || '公告')}</span>
+                            ${escapeHtml(notif.title)}
+                        </div>
+                        <div class="notification-content">${escapeHtml(notif.content)}</div>
+                        <div class="notification-date">${formatDate(notif.created_at)}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('[推送] 加载失败:', error);
+                console.error('[推送] 错误堆栈:', error.stack);
+                // 静默失败，显示默认推送消息，不弹出alert
+                container.innerHTML = `
+                    <div class="notification-item">
+                        <div class="notification-title">
+                            <span class="notification-tag">系统</span>
+                            欢迎使用校园失物招领系统
+                        </div>
+                        <div class="notification-content">
+                            您可以通过导航栏快速访问各个功能模块。如有问题，请访问社区交流区。
+                        </div>
+                        <div class="notification-date">${new Date().toLocaleDateString('zh-CN')}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 加载热帖
+        async function loadHotPosts() {
+            const container = document.getElementById('hotPostsList');
+            try {
+                const response = await fetch('/api/posts');
+                console.log('[热帖] 响应状态:', response.status);
+                const posts = await response.json();
+                console.log('[热帖] 数据:', posts);
+
+                // 筛选浏览量>=50的帖子,并按浏览量降序排序,只取前2个
+                const hotPosts = posts
+                    .filter(post => post.view_count >= 50)
+                    .sort((a, b) => b.view_count - a.view_count)
+                    .slice(0, 2);
+
+                if (hotPosts.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="padding: 20px; text-align: center; color: #999;">
+                            <div style="font-size: 40px; margin-bottom: 10px;">🔥</div>
+                            <p>暂无热门帖子</p>
+                            <p style="font-size: 12px; margin-top: 5px;">浏览量达到50的帖子才能上榜</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = hotPosts.map(post => `
+                    <div class="hot-post-card" onclick="openHotPostDetail(${post.id})">
+                        <div class="post-header">
+                            <h4 class="post-title">${escapeHtml(post.title)}</h4>
+                            <span class="post-category">${post.category}</span>
+                        </div>
+                        <p class="post-preview">${escapeHtml(post.content.substring(0, 40))}${post.content.length > 40 ? '...' : ''}</p>
+                        <div class="post-meta">
+                            <span class="post-author">👤 ${escapeHtml(post.username)}</span>
+                            <span class="post-date">${formatDate(post.created_at)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('加载热帖失败:', error);
+                container.innerHTML = `
+                    <div class="error-state" style="padding: 20px; text-align: center; color: #999;">
+                        <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+                        <p>加载失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 加载热门招领物品（按浏览量排序）
+        async function loadFoundItems() {
+            const container = document.getElementById('foundItemsList');
+            try {
+                const response = await fetch('/api/items?type=found&limit=10');
+                console.log('[招领物品] 响应状态:', response.status);
+                const items = await response.json();
+                console.log('[招领物品] 数据:', items);
+
+                // 按浏览量降序排序，取前2个
+                const hotItems = items
+                    .sort((a, b) => b.view_count - a.view_count)
+                    .slice(0, 2);
+
+                if (hotItems.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="padding: 20px; text-align: center; color: rgba(255,255,255,0.7);">
+                            <div style="font-size: 40px; margin-bottom: 10px;">🎒</div>
+                            <p>暂无招领物品</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = hotItems.map(item => `
+                    <div class="showcase-item-card" onclick="viewItemDetail(${item.id})">
+                        <div class="item-header">
+                            <h4 class="item-title">${escapeHtml(item.title)}</h4>
+                            <span class="item-badge found-badge">招领</span>
+                        </div>
+                        <p class="item-desc">${escapeHtml(item.description.substring(0, 60))}${item.description.length > 60 ? '...' : ''}</p>
+                        <div class="item-meta">
+                            <span class="item-location">📍 ${escapeHtml(item.location)}</span>
+                            <span class="item-date">${formatDate(item.created_at)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('[招领物品] 加载失败:', error);
+                container.innerHTML = `
+                    <div class="error-state" style="padding: 20px; text-align: center; color: rgba(255,255,255,0.7);">
+                        <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+                        <p>加载失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 加载热门找寻物品（按浏览量排序）
+        async function loadLostItems() {
+            const container = document.getElementById('lostItemsList');
+            try {
+                const response = await fetch('/api/items?type=lost&limit=10');
+                console.log('[找寻物品] 响应状态:', response.status);
+                const items = await response.json();
+                console.log('[找寻物品] 数据:', items);
+
+                // 按浏览量降序排序，取前2个
+                const hotItems = items
+                    .sort((a, b) => b.view_count - a.view_count)
+                    .slice(0, 2);
+
+                if (hotItems.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="padding: 20px; text-align: center; color: rgba(255,255,255,0.7);">
+                            <div style="font-size: 40px; margin-bottom: 10px;">📢</div>
+                            <p>暂无寻物信息</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = hotItems.map(item => `
+                    <div class="showcase-item-card" onclick="viewItemDetail(${item.id})">
+                        <div class="item-header">
+                            <h4 class="item-title">${escapeHtml(item.title)}</h4>
+                            <span class="item-badge lost-badge">找寻</span>
+                        </div>
+                        <p class="item-desc">${escapeHtml(item.description.substring(0, 60))}${item.description.length > 60 ? '...' : ''}</p>
+                        <div class="item-meta">
+                            <span class="item-location">📍 ${escapeHtml(item.location)}</span>
+                            <span class="item-date">${formatDate(item.created_at)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('[找寻物品] 加载失败:', error);
+                container.innerHTML = `
+                    <div class="error-state" style="padding: 20px; text-align: center; color: rgba(255,255,255,0.7);">
+                        <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+                        <p>加载失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 查看物品详情
+        function viewItemDetail(itemId) {
+            window.location.href = `item-detail.html?id=${itemId}`;
+        }
+
+        // 打开热门帖子详情
+        function openHotPostDetail(postId) {
+            // 跳转到帖子详情页面
+            window.location.href = `post-detail.html?id=${postId}`;
+        }
+
+        // 打开系统通知详情
+        function openNotificationDetail(notificationId) {
+            // 存储通知ID到localStorage
+            localStorage.setItem('pendingNotificationId', notificationId);
+            // 跳转到通知页面
+            window.location.href = 'notifications.html';
+        }
+
+        // 加载用户通知
+        async function loadUserNotifications() {
+            if (!authToken) return;
+
+            try {
+                const response = await fetch('/api/notifications', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateNotificationBadge(data.unread_count);
+                }
+            } catch (error) {
+                console.error('加载通知失败:', error);
+            }
+        }
+
+        // 更新通知角标
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notificationBadge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        // 格式化时间(相对时间)
+        function formatTime(timeString) {
+            const date = new Date(timeString);
+            const now = new Date();
+            const diff = now - date;
+
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return '刚刚';
+            if (minutes < 60) return `${minutes}分钟前`;
+            if (hours < 24) return `${hours}小时前`;
+            if (days < 7) return `${days}天前`;
+
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        // 重写checkLoginStatus,添加通知加载
+        const originalCheckLoginStatus = checkLoginStatus;
+        checkLoginStatus = function() {
+            originalCheckLoginStatus();
+            if (authToken) {
+                loadUserNotifications();
+            }
+        };
+    </script>
+</body>
+</html>

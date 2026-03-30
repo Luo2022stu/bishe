@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物品详情 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="javascript:history.back()" class="back-to-home-btn" title="返回上一页">←</a>
+        <div class="main-content">
+            <div class="item-detail-container" id="itemDetail">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let currentItem = null;
+        let itemId = null;
+
+        // 页面加载时获取物品详情
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            itemId = urlParams.get('id');
+
+            if (itemId) {
+                loadItemDetail(itemId);
+            } else {
+                document.getElementById('itemDetail').innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">❓</div>
+                        <p>未找到物品信息</p>
+                    </div>
+                `;
+            }
+        });
+
+        // 加载物品详情
+        async function loadItemDetail(id) {
+            try {
+                const response = await fetch(`${API_BASE}/items/${id}`);
+
+                if (!response.ok) {
+                    throw new Error('物品不存在');
+                }
+
+                const item = await response.json();
+                currentItem = item;
+                displayItemDetail(item);
+
+                // 记录浏览历史
+                trackBrowseHistory(item.type, item.id, item.title);
+
+                // 检查点赞状态
+                await checkLikeStatus(id);
+
+                // 检查举报状态
+                await checkReportStatus(item.type === 'found' ? 'item' : 'item', id);
+            } catch (error) {
+                console.error('加载物品详情失败:', error);
+                document.getElementById('itemDetail').innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
+                        <p>加载失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 显示物品详情
+        function displayItemDetail(item) {
+            const typeText = item.type === 'found' ? '🔍 失物招领' : '📢 失物找寻';
+            const locationText = item.type === 'found' ? '发现地点' : '丢失地点';
+            const canEdit = currentUser && (currentUser.role === 'admin' || item.user_id === currentUser.id);
+
+            document.getElementById('itemDetail').innerHTML = `
+                <div class="item-detail-card">
+                    <div class="item-detail-header">
+                        <span class="item-type">${typeText}</span>
+                        <div class="item-detail-meta">
+                            👁️ ${item.view_count} · ❤️ ${item.like_count} · 🕐 ${formatTime(item.created_at)}
+                        </div>
+                    </div>
+
+                    <h2 class="item-detail-title">${escapeHtml(item.title)}</h2>
+
+                    <div class="item-detail-info">
+                        <div class="info-row">
+                            <span class="info-label">📍 ${locationText}:</span>
+                            <span class="info-value">${escapeHtml(item.location)}</span>
+                            ${item.latitude && item.longitude ? `
+                                <a href="https://www.google.com/maps?q=${item.latitude},${item.longitude}" target="_blank" class="btn btn-small btn-secondary">
+                                    🗺️ 查看地图
+                                </a>
+                            ` : ''}
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📂 分类:</span>
+                            <span class="info-value">${escapeHtml(item.category)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📞 联系方式:</span>
+                            <span class="info-value">${escapeHtml(item.contact)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">📊 状态:</span>
+                            <span class="info-value status-${item.status}">${getStatusText(item.status)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">👤 发布者:</span>
+                            <span class="info-value">${item.username || '未知'}</span>
+                        </div>
+                    </div>
+
+                    ${item.images && item.images.length > 0 ? `
+                        <div class="item-detail-images">
+                            <h3>📷 物品图片</h3>
+                            <div class="item-images-grid">
+                                ${item.images.map((img, index) => `
+                                    <div class="item-image-wrapper">
+                                        <img src="${formatImageUrl(img)}" alt="物品图片 ${index + 1}" class="item-image" onclick="openImage('${formatImageUrl(img)}')" onerror="this.style.display='none'">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+
+
+                    <div class="item-detail-description">
+                        <h3>📝 详细描述</h3>
+                        <p>${escapeHtml(item.description)}</p>
+                    </div>
+
+                    <div class="item-detail-actions">
+                        <button class="btn btn-primary" onclick="toggleLike(${item.id})" id="likeBtn">
+                            ❤️ ${item.like_count}
+                        </button>
+                        ${!canEdit ? `
+                            <button class="btn btn-warning" onclick="showReportModal('item', ${item.id})" id="reportBtn">
+                                🚫 举报
+                            </button>
+                        ` : ''}
+                        ${canEdit ? `
+                            <div class="edit-actions">
+                                ${item.status === 'pending' ? `
+                                    <button class="btn btn-success" onclick="updateStatus(${item.id}, 'claimed')">
+                                        ✅ 标记为已认领
+                                    </button>
+                                    <button class="btn btn-success" onclick="updateStatus(${item.id}, 'returned')">
+                                        ✅ 标记为已归还
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-danger" onclick="deleteItem(${item.id})">
+                                    🗑️ 删除
+                                </button>
+                            </div>
+                        ` : ''}
+                        <button class="btn btn-secondary" onclick="goBack()">
+                            ← 返回
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // 检查用户是否已点赞
+            if (currentUser && authToken) {
+                checkLikeStatus(item.id);
+            }
+        }
+
+        // 检查点赞状态
+        async function checkLikeStatus(itemId) {
+            try {
+                const response = await fetch(`${API_BASE}/items/${itemId}/like/check`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.liked) {
+                        const likeBtn = document.getElementById('likeBtn');
+                        if (likeBtn) {
+                            likeBtn.classList.add('liked');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('检查点赞状态失败:', error);
+            }
+        }
+
+        // 检查举报状态
+        async function checkReportStatus(targetType, targetId) {
+            if (!authToken) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/report/check?target_type=${targetType}&target_id=${targetId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.reported) {
+                        const reportBtn = document.getElementById('reportBtn');
+                        if (reportBtn) {
+                            reportBtn.disabled = true;
+                            reportBtn.textContent = '✓ 已举报';
+                            reportBtn.classList.add('disabled');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('检查举报状态失败:', error);
+            }
+        }
+
+        // 点赞/取消点赞
+        async function toggleLike(itemId) {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/items/${itemId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const likeBtn = document.getElementById('likeBtn');
+                    likeBtn.textContent = `❤️ ${data.like_count}`;
+
+                    if (data.liked) {
+                        likeBtn.classList.add('liked');
+                    } else {
+                        likeBtn.classList.remove('liked');
+                    }
+                } else {
+                    alert(data.error || '操作失败');
+                }
+            } catch (error) {
+                console.error('点赞失败:', error);
+                alert('操作失败，请稍后重试');
+            }
+        }
+
+        // 更新物品状态
+        async function updateStatus(itemId, status) {
+            if (!confirm(`确定要将状态更改为"${getStatusText(status)}"吗？`)) {
+                return;
+            }
+
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                const response = await fetch(`${API_BASE}/items/${itemId}`, {
+                    method: 'PUT',
+                    headers: headers,
+                    body: JSON.stringify({ status })
+                });
+
+                if (response.ok) {
+                    alert('状态更新成功！');
+                    loadItemDetail(itemId);
+                } else {
+                    const data = await response.json();
+                    alert(data.error || '状态更新失败');
+                }
+            } catch (error) {
+                console.error('更新失败:', error);
+                alert('更新失败，请稍后重试');
+            }
+        }
+
+        // 删除物品
+        async function deleteItem(itemId) {
+            if (!confirm('确定要删除这条信息吗？此操作不可恢复！')) {
+                return;
+            }
+
+            try {
+                const headers = {};
+
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                const response = await fetch(`${API_BASE}/items/${itemId}`, {
+                    method: 'DELETE',
+                    headers: headers
+                });
+
+                if (response.ok) {
+                    alert('删除成功！');
+                    // 返回列表页
+                    const type = currentItem ? currentItem.type : 'found';
+                    window.location.href = type === 'found' ? 'found.html' : 'lost.html';
+                } else {
+                    const data = await response.json();
+                    alert(data.error || '删除失败');
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                alert('删除失败，请稍后重试');
+            }
+        }
+
+        // 返回上一页
+        function goBack() {
+            if (currentItem) {
+                window.location.href = currentItem.type === 'found' ? 'found.html' : 'lost.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 打开大图查看
+        function openImage(imageUrl) {
+            const modal = document.createElement('div');
+            modal.className = 'image-modal';
+            modal.onclick = () => modal.remove();
+            modal.innerHTML = `
+                <img src="${imageUrl}" alt="大图预览" class="image-modal-content">
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // 显示举报弹窗
+        function showReportModal(targetType, targetId) {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const modal = document.createElement('div');
+            modal.className = 'report-modal-overlay';
+            modal.innerHTML = `
+                <div class="report-modal" onclick="event.stopPropagation()">
+                    <div class="report-modal-header">
+                        <h3>🚫 举报内容</h3>
+                        <button class="close-btn" onclick="closeReportModal()">×</button>
+                    </div>
+                    <div class="report-modal-body">
+                        <div class="form-group">
+                            <label>举报原因:</label>
+                            <textarea id="reportReason" rows="4" placeholder="请详细说明举报原因（不超过200字）" maxlength="200"></textarea>
+                        </div>
+                        <div class="report-tips">
+                            <p>⚠️ 注意:</p>
+                            <ul>
+                                <li>恶意举报可能会降低您的信用分</li>
+                                <li>同一内容只能举报一次</li>
+                                <li>被举报的内容作者将被扣除10分信用分</li>
+                                <li>信用分降到0将被禁言一周</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="report-modal-footer">
+                        <button class="btn btn-secondary" onclick="closeReportModal()">取消</button>
+                        <button class="btn btn-danger" onclick="submitReport('${targetType}', ${targetId})">提交举报</button>
+                    </div>
+                </div>
+            `;
+            modal.onclick = (e) => {
+                if (e.target === modal) closeReportModal();
+            };
+            document.body.appendChild(modal);
+
+            // 为举报原因输入框添加回车提交功能
+            const reportTextarea = document.getElementById('reportReason');
+            if (reportTextarea) {
+                reportTextarea.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        submitReport(targetType, targetId);
+                    }
+                });
+            }
+        }
+
+        // 关闭举报弹窗
+        function closeReportModal() {
+            const modal = document.querySelector('.report-modal-overlay');
+            if (modal) modal.remove();
+        }
+
+        // 提交举报
+        async function submitReport(targetType, targetId) {
+            const reason = document.getElementById('reportReason').value.trim();
+
+            if (!reason) {
+                alert('请填写举报原因');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/report`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        target_type: targetType,
+                        target_id: targetId,
+                        reason: reason
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('举报提交成功！');
+                    closeReportModal();
+
+                    // 禁用举报按钮
+                    const reportBtn = document.getElementById('reportBtn');
+                    if (reportBtn) {
+                        reportBtn.disabled = true;
+                        reportBtn.textContent = '✓ 已举报';
+                        reportBtn.classList.add('disabled');
+                    }
+                } else {
+                    alert(data.error || '举报失败');
+                }
+            } catch (error) {
+                console.error('举报失败:', error);
+                alert('举报失败，请稍后重试');
+            }
+        }
+    </script>
+
+    <style>
+        /* 举报弹窗样式 */
+        .report-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .report-modal {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: #fff;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .report-modal-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-modal-header h3 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .report-modal-body {
+            padding: 20px;
+        }
+
+        .report-modal-body .form-group {
+            margin-bottom: 20px;
+        }
+
+        .report-modal-body label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e0;
+            font-weight: 500;
+        }
+
+        .report-modal-body textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+            box-sizing: border-box;
+        }
+
+        .report-modal-body textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .report-modal-body textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .report-tips {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .report-tips p {
+            margin: 0 0 10px 0;
+            color: #ff9800;
+            font-weight: 500;
+        }
+
+        .report-tips ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .report-tips li {
+            margin: 5px 0;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+
+        .report-modal-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .report-modal-footer .btn {
+            min-width: 100px;
+        }
+    </style>
+</body>
+</html>
+
+    <style>
+        .item-detail-images {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .item-detail-images h3 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        .item-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .item-image-wrapper {
+            position: relative;
+            aspect-ratio: 1;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .item-image-wrapper:hover {
+            transform: scale(1.02);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .item-image-wrapper:hover .item-image {
+            transform: scale(1.1);
+        }
+
+        /* 图片弹窗样式 */
+        .image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            cursor: pointer;
+        }
+
+        .image-modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .item-images-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+        }
+    </style>
+</body>
+</html>

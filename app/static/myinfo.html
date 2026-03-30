@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的信息 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>👤 我的信息  <span class="subtitle">查看和管理您的个人信息</span></h1>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <!-- 已登录用户信息 -->
+                    <span id="userInfoText"></span>
+                </div>
+            </div>
+        </header>
+
+        <div class="back-to-home-btn">
+            <div class="nav-icon">
+                <a href="index.html" title="首页">🏠</a>
+            </div>
+            <div class="nav-icon">
+                <a href="found.html" title="失物招领">🔍</a>
+            </div>
+            <div class="nav-icon">
+                <a href="lost.html" title="失物找寻">📢</a>
+            </div>
+            <div class="nav-icon">
+                <a href="forum.html" title="社区论坛">💬</a>
+            </div>
+            <div class="nav-icon">
+                <a href="locker.html" title="智能存储柜">📦</a>
+            </div>
+            <div class="nav-icon">
+                <a href="feedback.html" title="意见反馈">📝</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- 用户信息卡片 -->
+            <div class="profile-header">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-info">
+                    <h2 id="profileUsername">加载中...</h2>
+                    <p id="profileEmail">-</p>
+                    <p id="profilePhone">-</p>
+                    <p id="profileRole">-</p>
+                    <p id="profileCreated">-</p>
+                    <div class="credit-score-container">
+                        <span class="credit-label">信用分:</span>
+                        <span class="credit-score" id="creditScore">100</span>
+                        <div class="credit-status" id="creditStatus">正常</div>
+                    </div>
+                    <div id="muteInfo" style="display: none; margin-top: 10px; padding: 10px; background: rgba(255, 87, 34, 0.1); border: 1px solid rgba(255, 87, 34, 0.3); border-radius: 8px;">
+                        <p style="margin: 0; color: #ff5722; font-size: 14px;">⚠️ 您已被禁言，禁言期至: <span id="mutedUntil">-</span></p>
+                    </div>
+                    <div id="adminEntry" style="display: none; margin-top: 10px;">
+                        <button class="btn btn-primary" onclick="window.location.href='admin.html'">🔧 进入管理后台</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 统计数据 -->
+            <div class="stats-section">
+                <h3>📊 我的数据统计</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="statItems">0</div>
+                        <div class="stat-label">发布物品</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="statPosts">0</div>
+                        <div class="stat-label">发布帖子</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="statLiked">0</div>
+                        <div class="stat-label">点赞帖子</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="statComments">0</div>
+                        <div class="stat-label">发表评论</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="window.location.href='profile.html'">
+                    📋 我的发布
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='settings.html'">
+                    ⚙️ 个人设置
+                </button>
+                <button class="btn btn-danger" onclick="logout()">
+                    🚪 退出登录
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            loadMyInfo();
+        });
+
+        // 加载我的信息
+        async function loadMyInfo() {
+            if (!authToken) {
+                document.querySelector('.main-content').innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">🔒</div>
+                        <p>请先登录</p>
+                        <button class="btn btn-primary" onclick="window.location.href='login.html'">去登录</button>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                // 获取用户信息
+                const response = await fetch(`${API_BASE}/auth/user`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    updateProfileUI(data.user);
+                    loadUserStats();
+                } else if (response.status === 401) {
+                    logout();
+                }
+            } catch (error) {
+                console.error('加载失败:', error);
+            }
+        }
+
+        // 更新个人中心界面
+        function updateProfileUI(user) {
+            try {
+                // 用户信息
+                document.getElementById('profileUsername').textContent = user.username;
+                document.getElementById('profileEmail').textContent = `📧 ${user.email}`;
+                document.getElementById('profilePhone').textContent = user.phone ? `📱 ${user.phone}` : '📱 未设置';
+                document.getElementById('profileRole').textContent = `👤 ${user.role === 'admin' ? '管理员' : '普通用户'}`;
+                document.getElementById('profileCreated').textContent = `📅 注册于 ${user.created_at}`;
+
+                // 信用分
+                const creditScore = user.credit_score || 100;
+                const creditScoreEl = document.getElementById('creditScore');
+                const creditStatusEl = document.getElementById('creditStatus');
+                creditScoreEl.textContent = creditScore;
+
+                // 根据信用分设置状态
+                if (creditScore >= 90) {
+                    creditStatusEl.textContent = '优秀';
+                    creditStatusEl.style.color = '#4CAF50';
+                } else if (creditScore >= 60) {
+                    creditStatusEl.textContent = '良好';
+                    creditStatusEl.style.color = '#FF9800';
+                } else if (creditScore > 0) {
+                    creditStatusEl.textContent = '较差';
+                    creditStatusEl.style.color = '#FF5722';
+                } else {
+                    creditStatusEl.textContent = '已被禁言';
+                    creditStatusEl.style.color = '#f44336';
+                }
+
+                // 禁言状态
+                if (user.is_muted && user.muted_until) {
+                    document.getElementById('muteInfo').style.display = 'block';
+                    document.getElementById('mutedUntil').textContent = user.muted_until;
+                }
+
+                // 管理员入口
+                if (user.role === 'admin') {
+                    document.getElementById('adminEntry').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('更新UI失败:', error);
+            }
+        }
+
+        // 加载用户统计数据
+        async function loadUserStats() {
+            try {
+                const response = await fetch(`${API_BASE}/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('statItems').textContent = data.items ? data.items.length : 0;
+                    document.getElementById('statPosts').textContent = data.posts ? data.posts.length : 0;
+                    document.getElementById('statLiked').textContent = data.liked_posts ? data.liked_posts.length : 0;
+                    
+                    // 计算评论数（需要获取所有帖子评论）
+                    let commentCount = 0;
+                    if (data.posts) {
+                        for (const post of data.posts) {
+                            const postDetail = await fetch(`${API_BASE}/posts/${post.id}`);
+                            if (postDetail.ok) {
+                                const postData = await postDetail.json();
+                                commentCount += postData.comments ? postData.comments.length : 0;
+                            }
+                        }
+                    }
+                    document.getElementById('statComments').textContent = commentCount;
+                }
+            } catch (error) {
+                console.error('加载统计失败:', error);
+            }
+        }
+    </script>
+</body>
+</html>

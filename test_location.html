@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>定位测试</title>
+</head>
+<body>
+    <h1>浏览器定位测试</h1>
+    <button onclick="testBrowserLocation()">测试浏览器定位</button>
+    <button onclick="testBaiduLocation()">测试百度地图定位</button>
+    <div id="result"></div>
+
+    <script>
+        // 测试浏览器原生定位
+        function testBrowserLocation() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>正在测试浏览器定位...</p>';
+
+            if (!navigator.geolocation) {
+                resultDiv.innerHTML += '<p style="color:red">您的浏览器不支持地理定位</p>';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    resultDiv.innerHTML += `
+                        <p style="color:green">浏览器定位成功！</p>
+                        <p>纬度: ${position.coords.latitude}</p>
+                        <p>经度: ${position.coords.longitude}</p>
+                        <p>精度: ${position.coords.accuracy} 米</p>
+                    `;
+                },
+                function(error) {
+                    let errorMsg = '';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = '用户拒绝了定位请求';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = '位置信息不可用';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = '定位请求超时';
+                            break;
+                        default:
+                            errorMsg = '未知错误';
+                    }
+                    resultDiv.innerHTML += `<p style="color:red">浏览器定位失败: ${errorMsg}</p>`;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // 测试百度地图定位
+        function testBaiduLocation() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>正在测试百度地图定位...</p>';
+
+            // 动态加载百度地图API
+            if (!window.BMap) {
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = 'https://api.map.baidu.com/api?v=3.0&ak=vxirT0YlZRJ0wXuP79wiSklNONiY318V';
+                script.onload = function() {
+                    doBaiduLocation();
+                };
+                script.onerror = function() {
+                    resultDiv.innerHTML += '<p style="color:red">百度地图API加载失败</p>';
+                };
+                document.head.appendChild(script);
+            } else {
+                doBaiduLocation();
+            }
+        }
+
+        function doBaiduLocation() {
+            if (!window.BMap) {
+                document.getElementById('result').innerHTML += '<p style="color:red">BMap对象未加载</p>';
+                return;
+            }
+
+            const geolocation = new BMap.Geolocation();
+            geolocation.getCurrentPosition(function(r) {
+                if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+                    document.getElementById('result').innerHTML += `
+                        <p style="color:green">百度地图定位成功！</p>
+                        <p>纬度: ${r.point.lat}</p>
+                        <p>经度: ${r.point.lng}</p>
+                        <p>精度: ${r.accuracy} 米</p>
+                        <p>地址: ${r.address ? r.address.address : '未知'}</p>
+                    `;
+                } else {
+                    const status = this.getStatus();
+                    let errorMsg = '';
+                    switch(status) {
+                        case 1:
+                            errorMsg = '用户拒绝了定位请求';
+                            break;
+                        case 2:
+                            errorMsg = '位置信息不可用';
+                            break;
+                        case 3:
+                            errorMsg = '定位请求超时';
+                            break;
+                        case 4:
+                            errorMsg = '未知错误';
+                            break;
+                        case 5:
+                            errorMsg = '服务不可用';
+                            break;
+                        default:
+                            errorMsg = '未知状态码: ' + status;
+                    }
+                    document.getElementById('result').innerHTML += `<p style="color:red">百度地图定位失败: ${errorMsg}</p>`;
+                }
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,917 @@
+/* 智能存储柜样式 */
+
+.locker-header {
+    text-align: center;
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.locker-header h2 {
+    margin: 0 0 10px 0;
+    font-size: 2.2em;
+}
+
+.locker-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1.1em;
+}
+
+/* 选项卡样式 */
+.locker-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+.locker-tabs .tab-btn {
+    flex: 1;
+    padding: 15px 20px;
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.3s;
+}
+
+.locker-tabs .tab-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.locker-tabs .tab-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* 表单样式 */
+.locker-form {
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.locker-form h3 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-control::placeholder {
+    color: #aaa;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* 按钮样式 */
+.btn-block {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+/* 信息卡片样式 */
+.locker-info {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.info-card {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 15px;
+    border-left: 5px solid #667eea;
+    display: flex;
+    gap: 20px;
+}
+
+.info-card.success {
+    background: #d4edda;
+    border-left-color: #28a745;
+}
+
+.info-icon {
+    font-size: 40px;
+    flex-shrink: 0;
+}
+
+.info-content h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.2em;
+}
+
+.info-content ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #666;
+}
+
+.info-content li {
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+/* 物品信息显示 */
+.item-info {
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #555;
+    min-width: 120px;
+}
+
+.info-value {
+    color: #333;
+    flex: 1;
+}
+
+/* 我的物品列表 */
+.my-items-section {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.my-items-section h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.my-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.my-item-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+}
+
+.my-item-card:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.item-header h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1.3em;
+}
+
+.item-details {
+    margin-bottom: 15px;
+}
+
+.detail-row {
+    display: flex;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #666;
+    min-width: 100px;
+}
+
+.detail-value {
+    color: #333;
+    flex: 1;
+}
+
+.detail-value.code {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: #667eea;
+    letter-spacing: 2px;
+}
+
+.item-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* 徽章样式 */
+.badge {
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.badge-warning {
+    background: #ffc107;
+    color: #333;
+}
+
+.badge-success {
+    background: #28a745;
+    color: white;
+}
+
+.badge-danger {
+    background: #dc3545;
+    color: white;
+}
+
+/* 空状态 */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .locker-header {
+        padding: 30px 15px;
+    }
+
+    .locker-header h2 {
+        font-size: 1.8em;
+    }
+
+    .locker-tabs {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .locker-form {
+        padding: 20px;
+    }
+
+    .info-card {
+        flex-direction: column;
+    }
+
+    .info-icon {
+        text-align: center;
+    }
+
+    .item-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .detail-row {
+        flex-direction: column;
+    }
+
+    .detail-label {
+        margin-bottom: 5px;
+    }
+}
+
+/* ========== 美团风格柜子视图 ========== */
+
+/* 柜子网格容器 */
+.locker-grid-container {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+/* 柜子网格标题 */
+.locker-grid-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.locker-grid-title span {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 柜子网格 - 仿美团外卖柜布局 */
+.locker-grid {
+    display: grid;
+    gap: 15px;
+    grid-template-columns: repeat(5, 1fr);
+    margin-bottom: 20px;
+}
+
+/* 柜子单元 - 仿美团外卖柜格子 */
+.locker-unit {
+    background: #f8f9fa;
+    border: 3px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 15px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.locker-unit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.locker-unit.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* 可用状态 - 绿色，仿美团空闲柜 */
+.locker-unit.available {
+    border-color: #52c41a;
+    background: linear-gradient(135deg, #f6ffed 0%, #f0fff4 100%);
+}
+
+.locker-unit.available:hover {
+    background: linear-gradient(135deg, #d9f7be 0%, #b7eb8f 100%);
+}
+
+/* 占用状态 - 橙色，仿美团占用柜 */
+.locker-unit.occupied {
+    border-color: #faad14;
+    background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%);
+    cursor: not-allowed;
+}
+
+.locker-unit.occupied:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* 维护状态 - 灰色 */
+.locker-unit.maintenance {
+    border-color: #d9d9d9;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.locker-unit.maintenance:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* 柜子编号 */
+.locker-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+    font-family: 'Arial Black', sans-serif;
+    letter-spacing: 1px;
+}
+
+.locker-unit.available .locker-number {
+    color: #52c41a;
+}
+
+.locker-unit.occupied .locker-number {
+    color: #faad14;
+}
+
+.locker-unit.maintenance .locker-number {
+    color: #999;
+}
+
+/* 状态指示灯 */
+.locker-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.locker-unit.available .locker-status {
+    background: #f6ffed;
+    color: #52c41a;
+}
+
+.locker-unit.occupied .locker-status {
+    background: #fff7e6;
+    color: #faad14;
+}
+
+.locker-unit.maintenance .locker-status {
+    background: #fafafa;
+    color: #999;
+}
+
+/* 状态指示点 */
+.locker-status::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* 图例区域 */
+.locker-legend {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding-top: 15px;
+    border-top: 2px solid #f0f0f0;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.legend-item:hover {
+    transform: scale(1.05);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid;
+}
+
+.legend-color.available {
+    background: linear-gradient(135deg, #f6ffed 0%, #f0fff4 100%);
+    border-color: #52c41a;
+}
+
+.legend-color.occupied {
+    background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%);
+    border-color: #faad14;
+}
+
+.legend-color.maintenance {
+    background: #fafafa;
+    border-color: #d9d9d9;
+}
+
+/* 柜子详情面板 - 仿美团弹出层 */
+.locker-detail-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    width: 90%;
+    max-width: 400px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.locker-detail-panel.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.locker-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.locker-detail-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.locker-detail-close {
+    background: #f5f5f5;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.locker-detail-close:hover {
+    background: #ff4d4f;
+    color: white;
+    transform: rotate(90deg);
+}
+
+.locker-detail-info {
+    margin-bottom: 20px;
+}
+
+.locker-detail-info > div {
+    margin-bottom: 15px;
+}
+
+.info-label {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* 遮罩层 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .locker-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .locker-unit {
+        min-height: 80px;
+        padding: 10px 5px;
+    }
+
+    .locker-number {
+        font-size: 22px;
+    }
+
+    .locker-status {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+
+    .locker-legend {
+        gap: 15px;
+    }
+
+    .legend-item {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .locker-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .locker-grid-container {
+        padding: 20px 15px;
+    }
+}
+
+/* 扫码按钮样式 */
+.scan-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 15px;
+    background: linear-gradient(135deg, #f0f2ff 0%, #e8eef5 100%);
+    border: 2px solid #667eea;
+    border-radius: 10px;
+    color: #667eea;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.scan-btn:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* 取件历史时间线 */
+.pickup-history {
+    margin-top: 30px;
+}
+
+.history-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.history-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.history-item:hover {
+    background: #f0f2ff;
+    transform: translateX(5px);
+}
+
+.history-time {
+    font-size: 12px;
+    color: #999;
+    min-width: 120px;
+}
+
+.history-item-name {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+}
+
+.history-item-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.history-item-status.pending {
+    background: #fff7e6;
+    color: #faad14;
+}
+
+.history-item-status.claimed {
+    background: #f6ffed;
+    color: #52c41a;
+}
+
+.history-item-status.expired {
+    background: #fff1f0;
+    color: #ff4d4f;
+}
+
+/* 统计卡片样式优化 */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #999;
+    font-weight: 600;
+}
+
+/* 快捷操作卡片 */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.quick-action-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-5px);
+    border-color: #667eea;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.quick-action-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.quick-action-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.quick-action-desc {
+    font-size: 14px;
+    color: #999;
+}
+
+/* 列表选项卡 */
+.list-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    background: white;
+    padding: 10px;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.list-tab-btn {
+    flex: 1;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.3s;
+}
+
+.list-tab-btn:hover {
+    background: #f0f2ff;
+    color: #667eea;
+}
+
+.list-tab-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+

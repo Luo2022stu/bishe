@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>失物招领 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🎒 校园失物招领系统</h1>
+                    <p class="subtitle">失物招领</p>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <button class="btn btn-secondary" onclick="window.location.href='login.html'">登录 / 注册</button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item">🏠 首页</a>
+            <a href="found.html" class="nav-item active">🔍 失物招领</a>
+            <a href="lost.html" class="nav-item">📢 失物找寻</a>
+            <a href="items.html" class="nav-item">📋 物品列表</a>
+        </nav>
+
+        <div class="main-content">
+            <div class="form-section">
+                <h2>📝 发布失物招领</h2>
+                <form id="foundForm" class="item-form" onsubmit="handlePublishFound(event)">
+                    <div class="form-group">
+                        <label for="foundTitle">物品名称 *</label>
+                        <input type="text" id="foundTitle" required placeholder="例如：黑色钱包、学生证">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="foundCategory">物品类别 *</label>
+                        <select id="foundCategory" required>
+                            <option value="">请选择类别</option>
+                            <option value="证件类">证件类</option>
+                            <option value="电子设备">电子设备</option>
+                            <option value="书籍文具">书籍文具</option>
+                            <option value="衣物配饰">衣物配饰</option>
+                            <option value="钥匙">钥匙</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="foundLocation">发现地点 *</label>
+                        <div class="location-input-group">
+                            <input type="text" id="foundLocation" required placeholder="例如：图书馆三楼、食堂二楼">
+                            <button type="button" class="btn btn-location" onclick="getLocation('found')">📍 定位</button>
+                        </div>
+                        <input type="hidden" id="foundLatitude">
+                        <input type="hidden" id="foundLongitude">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="foundContact">联系方式 *</label>
+                        <input type="text" id="foundContact" required placeholder="手机号或微信号">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="foundDescription">详细描述 *</label>
+                        <textarea id="foundDescription" rows="4" required placeholder="请详细描述物品特征、发现时间等信息"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">发布招领信息</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

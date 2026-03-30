@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能匹配 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="smart-match-styles.css">
+</head>
+<body>
+    <div class="container">
+        
+        <header>
+            <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🎯 智能匹配 <span class="subtitle">为您推荐的招领-找寻匹配</span></h1>
+                </div>
+            <div class="user-info" id="userInfo">
+                <button class="btn btn-secondary" onclick="window.location.href='login.html'">登录 / 注册</button>
+            </div>
+
+            <div class="user-dropdown" id="userDropdown" style="display: none;">
+                <div class="user-dropdown-btn">
+                    <span class="user-icon">👤</span>
+                    <span class="user-name" id="userName">用户名</span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="user-dropdown-menu">
+                    <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                        <span class="dropdown-icon">👤</span>
+                        <span>个人中心</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='chat.html'">
+                        <span class="dropdown-icon">💬</span>
+                        <span>聊天</span>
+                        <span class="notification-badge-small" id="chatBadge" style="display: none;">0</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='notifications.html'">
+                        <span class="dropdown-icon">🔔</span>
+                        <span>消息</span>
+                        <span class="notification-badge-small" id="dropdownNotificationBadge" style="display: none;">0</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                        <span class="dropdown-icon">⚙️</span>
+                        <span>设置</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item danger" onclick="logout()">
+                        <span class="dropdown-icon">🚪</span>
+                        <span>退出登录</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="smart-match-section">
+                <div class="match-header-info">
+                    <div class="match-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">匹配数量</span>
+                            <span class="stat-value" id="matchCount">0</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadSmartMatches()">🔄 刷新匹配</button>
+                </div>
+                <p class="section-desc">基于您的发布信息，智能匹配相反类型的物品，帮助您快速找到失主或失物</p>
+                <div id="smartMatchList" class="smart-match-list">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 获取当前用户ID
+        function getCurrentUserId() {
+            const token = localStorage.getItem('authToken');
+            if (!token) return null;
+            try {
+                return parseInt(token.split('_')[1]);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // 页面加载时获取智能匹配
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSmartMatches();
+        });
+
+        // 计算两个字符串的编辑距离（Levenshtein距离）
+        function calculateEditDistance(str1, str2) {
+            const len1 = str1.length;
+            const len2 = str2.length;
+            const matrix = [];
+
+            for (let i = 0; i <= len1; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= len2; j++) {
+                matrix[0][j] = j;
+            }
+
+            for (let i = 1; i <= len1; i++) {
+                for (let j = 1; j <= len2; j++) {
+                    const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j] + 1,
+                        matrix[i][j - 1] + 1,
+                        matrix[i - 1][j - 1] + cost
+                    );
+                }
+            }
+
+            return matrix[len1][len2];
+        }
+
+        // 计算文本相似度（0-1）
+        function calculateTextSimilarity(str1, str2) {
+            const s1 = str1.toLowerCase().trim();
+            const s2 = str2.toLowerCase().trim();
+
+            if (s1 === s2) return 1;
+            if (!s1 || !s2) return 0;
+
+            const maxLength = Math.max(s1.length, s2.length);
+            const editDistance = calculateEditDistance(s1, s2);
+            return 1 - (editDistance / maxLength);
+        }
+
+        // 提取关键词（中文和英文）
+        function extractKeywords(text) {
+            // 移除标点符号和特殊字符
+            const cleaned = text.replace(/[^\w\u4e00-\u9fa5\s]/g, ' ');
+
+            // 英文单词（2个字母以上）
+            const englishWords = cleaned.match(/[a-zA-Z]{2,}/g) || [];
+
+            // 中文分词（按2-4个字符切分）
+            const chineseSegments = [];
+            for (let i = 0; i < cleaned.length - 1; i++) {
+                for (let len = 2; len <= 4 && i + len <= cleaned.length; len++) {
+                    const segment = cleaned.substring(i, i + len);
+                    if (/[\u4e00-\u9fa5]/.test(segment)) {
+                        chineseSegments.push(segment);
+                    }
+                }
+            }
+
+            return {
+                english: englishWords,
+                chinese: [...new Set(chineseSegments)]
+            };
+        }
+
+        // 计算匹配分数
+        function calculateMatchScore(userItem, targetItem) {
+            let score = 0;
+            let matchReasons = [];
+
+            // 1. 类别匹配 (35分)
+            if (userItem.category === targetItem.category) {
+                score += 35;
+                matchReasons.push(`相同类别: ${userItem.category}`);
+            }
+
+            // 2. 标题文本相似度 (30分)
+            const titleSimilarity = calculateTextSimilarity(userItem.title, targetItem.title);
+            if (titleSimilarity > 0.3) {
+                score += 30 * titleSimilarity;
+                matchReasons.push(`标题相似: ${Math.round(titleSimilarity * 100)}%`);
+            }
+
+            // 3. 标题关键词匹配 (25分)
+            const userKeywords = extractKeywords(userItem.title);
+            const targetKeywords = extractKeywords(targetItem.title);
+
+            let keywordMatches = 0;
+            // 英文单词匹配
+            userKeywords.english.forEach(word => {
+                if (targetKeywords.english.includes(word)) {
+                    keywordMatches++;
+                }
+            });
+            // 中文片段匹配
+            userKeywords.chinese.forEach(segment => {
+                if (targetKeywords.chinese.includes(segment)) {
+                    keywordMatches++;
+                }
+            });
+
+            if (keywordMatches > 0) {
+                score += 25 * Math.min(keywordMatches / 3, 1);
+                matchReasons.push(`关键词匹配: ${keywordMatches}个`);
+            }
+
+            // 4. 地点匹配 (20分)
+            if (userItem.location && targetItem.location) {
+                const locationSimilarity = calculateTextSimilarity(userItem.location, targetItem.location);
+                if (locationSimilarity > 0.4) {
+                    score += 20 * locationSimilarity;
+                    matchReasons.push(`地点相似: ${Math.round(locationSimilarity * 100)}%`);
+                }
+            }
+
+            // 5. 描述文本相似度 (15分)
+            if (userItem.description && targetItem.description) {
+                const descSimilarity = calculateTextSimilarity(userItem.description, targetItem.description);
+                if (descSimilarity > 0.25) {
+                    score += 15 * descSimilarity;
+                    matchReasons.push(`描述相似: ${Math.round(descSimilarity * 100)}%`);
+                }
+            }
+
+            // 6. 时间权重 (10分) - 发布时间越近，权重越高
+            const now = new Date();
+            const userDate = new Date(userItem.created_at);
+            const targetDate = new Date(targetItem.created_at);
+            const maxAgeDays = 30; // 30天内的物品有额外权重
+            const ageDiffDays = Math.abs(now - targetDate) / (1000 * 60 * 60 * 24);
+            if (ageDiffDays <= maxAgeDays) {
+                score += 10 * (1 - ageDiffDays / maxAgeDays);
+                matchReasons.push('近期发布');
+            }
+
+            return { score, matchReasons };
+        }
+
+        // 加载智能匹配（为当前用户的物品匹配相反类型的物品）
+        async function loadSmartMatches() {
+            const container = document.getElementById('smartMatchList');
+            const matchCountEl = document.getElementById('matchCount');
+            const currentUserId = getCurrentUserId();
+
+            try {
+                // 检查是否登录
+                if (!authToken || !currentUserId) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="padding: 60px 20px; text-align: center; color: rgba(255,255,255,0.8);">
+                            <div style="font-size: 60px; margin-bottom: 20px;">🔐</div>
+                            <p style="font-size: 18px; margin-bottom: 10px;">请先登录</p>
+                            <p style="font-size: 14px; color: rgba(255,255,255,0.6);">登录后即可查看为您推荐的匹配物品</p>
+                            <button class="btn btn-primary" style="margin-top: 20px;" onclick="window.location.href='login.html'">立即登录</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 获取当前用户发布的物品
+                const userItemsResponse = await fetch(`/api/items?user_id=${currentUserId}`);
+                const userItems = await userItemsResponse.json();
+
+                if (userItems.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="padding: 60px 20px; text-align: center; color: rgba(255,255,255,0.8);">
+                            <div style="font-size: 60px; margin-bottom: 20px;">📋</div>
+                            <p style="font-size: 18px; margin-bottom: 10px;">暂无发布记录</p>
+                            <p style="font-size: 14px; color: rgba(255,255,255,0.6);">发布失物或招领信息后，系统将为您智能匹配</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 获取所有招领物品
+                const foundResponse = await fetch('/api/items?type=found&limit=100');
+                const foundItems = await foundResponse.json();
+
+                // 获取所有找寻物品
+                const lostResponse = await fetch('/api/items?type=lost&limit=100');
+                const lostItems = await lostResponse.json();
+
+                // 为每个用户物品查找匹配
+                const allMatches = [];
+
+                for (const userItem of userItems) {
+                    const targetType = userItem.type === 'found' ? 'lost' : 'found';
+                    const targetItems = targetType === 'found' ? foundItems : lostItems;
+
+                    for (const targetItem of targetItems) {
+                        // 跳过自己发布的物品
+                        if (targetItem.user_id === currentUserId) {
+                            continue;
+                        }
+
+                        // 计算匹配分数
+                        const { score, matchReasons } = calculateMatchScore(userItem, targetItem);
+
+                        // 只保留匹配分数 >= 40 的匹配（降低阈值以提供更多匹配）
+                        if (score >= 40) {
+                            allMatches.push({
+                                userItem,
+                                targetItem,
+                                score,
+                                matchReasons
+                            });
+                        }
+                    }
+                }
+
+                // 按匹配分数降序排序
+                allMatches.sort((a, b) => b.score - a.score);
+
+                // 只显示前20个最匹配的结果
+                const topMatches = allMatches.slice(0, 20);
+
+                // 更新统计信息
+                matchCountEl.textContent = topMatches.length;
+
+                if (topMatches.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="padding: 60px 20px; text-align: center; color: rgba(255,255,255,0.8);">
+                            <div style="font-size: 60px; margin-bottom: 20px;">🎯</div>
+                            <p style="font-size: 18px; margin-bottom: 10px;">暂无匹配项</p>
+                            <p style="font-size: 14px; color: rgba(255,255,255,0.6);">系统未找到匹配度 ≥ 40% 的物品，请耐心等待</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = topMatches.map(match => {
+                    const confidence = Math.min(Math.round(match.score), 95);
+                    const userItemLabel = match.userItem.type === 'found' ? '您捡到的' : '您丢的';
+                    const targetItemLabel = match.targetItem.type === 'found' ? '🔍 招领物品' : '📢 找寻物品';
+                    const targetUser = match.targetItem.username || '未知用户';
+                    const timeDiff = getTimeDifference(match.userItem.created_at, match.targetItem.created_at);
+                    const suggestion = match.userItem.type === 'found'
+                        ? `建议您联系该找寻者，确认是否为其失物`
+                        : `建议您立即联系TA，确认是否为您的失物`;
+
+                    return `
+                        <div class="smart-match-item" onclick="viewMatchDetail(${match.targetItem.id})">
+                            <div class="match-header">
+                                <div class="match-title">${userItemLabel}${escapeHtml(match.userItem.title)}</div>
+                                <div class="match-confidence">匹配度: ${confidence}%</div>
+                            </div>
+                            <div style="margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.15); border-radius: 8px;">
+                                <div style="color: rgba(255,255,255,0.9); font-size: 15px; font-weight: 500; margin-bottom: 8px;">
+                                    ${escapeHtml(match.targetItem.title)} <span class="item-badge ${match.targetItem.type === 'found' ? 'found-badge' : 'lost-badge'}">${targetItemLabel}</span>
+                                </div>
+                                <div style="color: rgba(255,255,255,0.85); font-size: 14px; margin-bottom: 6px;">
+                                    发布人: ${escapeHtml(targetUser)}
+                                </div>
+                                <div style="color: rgba(255,255,255,0.75); font-size: 13px;">
+                                    ${timeDiff}发布
+                                </div>
+                            </div>
+                            <div class="match-info">
+                                <div class="match-category">
+                                    <span class="match-label">类别:</span>
+                                    <span class="match-value">${escapeHtml(match.targetItem.category)}</span>
+                                </div>
+                                <div class="match-location">
+                                    <span class="match-label">地点:</span>
+                                    <span class="match-value">${escapeHtml(match.targetItem.location)}</span>
+                                </div>
+                            </div>
+                            <div style="margin: 15px 0; padding: 12px; background: rgba(76, 175, 80, 0.2); border-radius: 8px; border-left: 4px solid #4CAF50;">
+                                <div style="color: #81C784; font-size: 14px; font-weight: 500;">
+                                    💡 ${suggestion}
+                                </div>
+                            </div>
+                            <div class="match-reasons">
+                                ${match.matchReasons.map(reason =>
+                                    `<span class="match-item-badge">${escapeHtml(reason)}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                console.log('[智能匹配] 找到', topMatches.length, '个匹配项（共', allMatches.length, '个候选）');
+            } catch (error) {
+                console.error('[智能匹配] 加载失败:', error);
+                container.innerHTML = `
+                    <div class="empty-state" style="padding: 60px 20px; text-align: center; color: rgba(255,255,255,0.8);">
+                        <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
+                        <p style="font-size: 18px; margin-bottom: 10px;">加载失败</p>
+                        <p style="font-size: 14px; color: rgba(255,255,255,0.6);">请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 计算时间差
+        function getTimeDifference(date1, date2) {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            const diff = Math.abs(d2 - d1);
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+            if (days > 0) {
+                return `${days}天前`;
+            } else if (hours > 0) {
+                return `${hours}小时前`;
+            } else {
+                return '刚刚';
+            }
+        }
+
+        // 查看匹配详情
+        function viewMatchDetail(itemId) {
+            window.location.href = `item-detail.html?id=${itemId}`;
+        }
+    </script>
+</body>
+</html>

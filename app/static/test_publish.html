@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试发布功能</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #667eea;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        #result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🧪 发布功能测试</h1>
+
+    <div class="section">
+        <h2>1. 测试登录</h2>
+        <input type="text" id="testUsername" placeholder="用户名" value="admin">
+        <input type="password" id="testPassword" placeholder="密码" value="admin123">
+        <button onclick="testLogin()">登录</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. 测试发布物品</h2>
+        <input type="text" id="testTitle" placeholder="物品名称" value="测试物品">
+        <select id="testCategory">
+            <option value="证件类">证件类</option>
+            <option value="电子设备">电子设备</option>
+            <option value="书籍文具">书籍文具</option>
+            <option value="其他">其他</option>
+        </select>
+        <input type="text" id="testLocation" placeholder="地点" value="测试地点">
+        <input type="text" id="testContact" placeholder="联系方式" value="13800138000">
+        <textarea id="testDescription" rows="3" placeholder="详细描述">这是一个测试物品</textarea>
+        <button onclick="testPublish('found')">发布失物招领</button>
+        <button onclick="testPublish('lost')">发布失物找寻</button>
+        <div id="publishResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. 检查状态</h2>
+        <button onclick="checkStatus()">检查登录状态和Token</button>
+        <div id="statusResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. 请求日志</h2>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let authToken = null;
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML = `[${time}] ${message}<br>` + logDiv.innerHTML;
+        }
+
+        function testLogin() {
+            const username = document.getElementById('testUsername').value;
+            const password = document.getElementById('testPassword').value;
+            const resultDiv = document.getElementById('loginResult');
+
+            log(`尝试登录: ${username}`);
+
+            fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => {
+                log(`登录响应状态: ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                if (data.token) {
+                    authToken = data.token;
+                    localStorage.setItem('authToken', authToken);
+                    resultDiv.innerHTML = `<span class="success">登录成功!</span><br>Token: ${authToken.substring(0, 30)}...<br>用户: ${data.user.username}`;
+                    log('登录成功，Token已保存');
+                } else {
+                    resultDiv.innerHTML = `<span class="error">登录失败: ${data.error}</span>`;
+                    log(`登录失败: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<span class="error">请求失败: ${error.message}</span>`;
+                log(`请求失败: ${error.message}`);
+            });
+        }
+
+        function testPublish(type) {
+            const data = {
+                type: type,
+                title: document.getElementById('testTitle').value,
+                category: document.getElementById('testCategory').value,
+                location: document.getElementById('testLocation').value,
+                contact: document.getElementById('testContact').value,
+                description: document.getElementById('testDescription').value,
+                latitude: null,
+                longitude: null
+            };
+            const resultDiv = document.getElementById('publishResult');
+
+            authToken = localStorage.getItem('authToken');
+
+            if (!authToken) {
+                resultDiv.innerHTML = `<span class="error">请先登录!</span>`;
+                log('发布失败: 未登录');
+                return;
+            }
+
+            log(`准备发布${type === 'found' ? '失物招领' : '失物找寻'}: ${data.title}`);
+            log(`使用Token: ${authToken.substring(0, 30)}...`);
+
+            fetch(`${API_BASE}/items`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => {
+                log(`发布响应状态: ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                if (data.id) {
+                    resultDiv.innerHTML = `<span class="success">发布成功!</span><br>物品ID: ${data.id}<br>详情: ${JSON.stringify(data, null, 2)}`;
+                    log('发布成功!');
+                } else {
+                    resultDiv.innerHTML = `<span class="error">发布失败: ${data.error}</span>`;
+                    log(`发布失败: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<span class="error">请求失败: ${error.message}</span>`;
+                log(`请求失败: ${error.message}`);
+            });
+        }
+
+        function checkStatus() {
+            const resultDiv = document.getElementById('statusResult');
+            authToken = localStorage.getItem('authToken');
+
+            let status = `Token存在: ${!!authToken}\n`;
+            if (authToken) {
+                status += `Token内容: ${authToken.substring(0, 50)}...\n`;
+            }
+            status += `\nlocalStorage内容:\n`;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                status += `  ${key}: ${localStorage.getItem(key).substring(0, 50)}...\n`;
+            }
+
+            resultDiv.innerHTML = `<pre>${status}</pre>`;
+            log('状态已检查');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>帖子详情 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="report-styles.css">
+</head>
+<body>
+    <div class="container">
+        
+        <header>
+            <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>💬 帖子详情  <span class="subtitle">查看帖子内容和评论</span></h1>
+                </div>
+            <div class="user-info" id="userInfo">
+                <button class="btn btn-secondary" onclick="window.location.href='login.html'">登录 / 注册</button>
+            </div>
+
+            <div class="user-dropdown" id="userDropdown" style="display: none;">
+                <div class="user-dropdown-btn">
+                    <span class="user-icon">👤</span>
+                    <span class="user-name" id="userName">用户名</span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="user-dropdown-menu">
+                    <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                        <span class="dropdown-icon">👤</span>
+                        <span>个人中心</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='chat.html'">
+                        <span class="dropdown-icon">💬</span>
+                        <span>聊天</span>
+                        <span class="notification-badge-small" id="chatBadge" style="display: none;">0</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='notifications.html'">
+                        <span class="dropdown-icon">🔔</span>
+                        <span>消息</span>
+                        <span class="notification-badge-small" id="dropdownNotificationBadge" style="display: none;">0</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                        <span class="dropdown-icon">⚙️</span>
+                        <span>设置</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item danger" onclick="logout()">
+                        <span class="dropdown-icon">🚪</span>
+                        <span>退出登录</span>
+                    </div>
+
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- 帖子详情 -->
+            <div class="post-detail-section" id="postDetail">
+                <div class="loading">加载中...</div>
+            </div>
+
+            <!-- 评论区 -->
+            <div class="comments-section" id="commentsSection">
+                <div class="section-header">
+                    <h3>💬 评论 (<span id="commentCount">0</span>)</h3>
+                </div>
+                <div id="commentsList">
+                    <div class="loading">加载中...</div>
+                </div>
+
+                <!-- 发表评论表单 -->
+                <div class="create-comment-form" id="commentForm">
+                    <h4>发表评论</h4>
+                    <textarea id="commentContent" rows="3" placeholder="输入评论内容..."></textarea>
+                    <button class="btn btn-primary" onclick="submitComment()">发表评论</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 举报弹窗 -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🚫 举报内容</h3>
+                <button class="modal-close" onclick="closeReportModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="report-form">
+                    <label>举报原因:</label>
+                    <textarea id="reportReason" rows="4" placeholder="请详细说明举报原因（不超过200字）" maxlength="200"></textarea>
+                    <div class="report-tips">
+                        <p>⚠️ 举报须知:</p>
+                        <ul>
+                            <li>请如实填写举报原因，恶意举报可能会降低您的信用分</li>
+                            <li>同一内容只能举报一次</li>
+                            <li>被举报的内容作者将被扣除10分信用分</li>
+                        </ul>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeReportModal()">取消</button>
+                        <button class="btn btn-danger" id="submitReportBtn">提交举报</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        console.log('[帖子详情] 脚本开始加载');
+        console.log('[帖子详情] API_BASE:', typeof API_BASE !== 'undefined' ? API_BASE : '未定义');
+
+        let currentPost = null;
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[帖子详情] DOMContentLoaded触发');
+            console.log('[帖子详情] API_BASE:', API_BASE);
+
+            checkLoginStatus();
+
+            // 从URL获取帖子ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const postId = urlParams.get('id');
+
+            console.log('[帖子详情] URL参数postId:', postId);
+
+            if (postId) {
+                currentPostId = parseInt(postId);
+                console.log('[帖子详情] 准备加载帖子ID:', currentPostId);
+                loadPostDetail(currentPostId);
+                loadComments(currentPostId);
+            } else {
+                document.getElementById('postDetail').innerHTML = `
+                    <div class="empty-state" style="padding: 40px; text-align: center; color: #999;">
+                        <div style="font-size: 60px; margin-bottom: 20px;">📝</div>
+                        <p>未找到帖子</p>
+                        <button class="btn btn-primary" style="margin-top: 20px;" onclick="window.location.href='forum.html'">返回社区</button>
+                    </div>
+                `;
+            }
+
+            // 为评论输入框添加回车提交功能
+            const commentTextarea = document.getElementById('commentContent');
+            if (commentTextarea) {
+                commentTextarea.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        submitComment();
+                    }
+                });
+            }
+        });
+
+        // 加载帖子详情
+        async function loadPostDetail(postId) {
+            try {
+                const url = `${API_BASE}/posts/${postId}`;
+                console.log('[帖子详情] 请求URL:', url);
+
+                const headers = {};
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: headers
+                });
+                console.log('[帖子详情] 响应状态:', response.status);
+
+                // 检查响应是否为 JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('[帖子详情] 响应不是JSON:', text.substring(0, 200));
+                    throw new Error(`服务器返回错误: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('[帖子详情] 返回数据:', data);
+
+                if (response.ok) {
+                    currentPost = data;
+                    renderPostDetail(data);
+                    // 检查帖子举报状态
+                    checkPostReportStatus(postId);
+                } else {
+                    throw new Error(data.error || '加载失败');
+                }
+            } catch (error) {
+                console.error('加载帖子详情失败:', error);
+                console.error('错误堆栈:', error.stack);
+                document.getElementById('postDetail').innerHTML = `
+                    <div class="empty-state" style="padding: 40px; text-align: center; color: #999;">
+                        <div style="font-size: 60px; margin-bottom: 20px;">❌</div>
+                        <p>加载失败: ${error.message}</p>
+                        <p style="margin-top: 10px; font-size: 14px;">帖子ID: ${postId}</p>
+                        <button class="btn btn-primary" style="margin-top: 20px;" onclick="window.location.href='forum.html'">返回社区</button>
+                    </div>
+                `;
+            }
+        }
+
+        // 渲染帖子详情
+        function renderPostDetail(post) {
+            const isAuthor = currentUser && currentUser.id === post.user_id;
+            const isAdmin = currentUser && currentUser.role === 'admin';
+
+            // 判断内容是否过长（超过5行）
+            const content = escapeHtml(post.content);
+            const lines = content.split('\n').length;
+            const isLongContent = lines > 5;
+
+            // 处理图片URL
+            const imageUrl = post.image ? (post.image.startsWith('data:') ? post.image : `data:image/jpeg;base64,${post.image}`) : '';
+
+            document.getElementById('postDetail').innerHTML = `
+                <div class="post-detail-card">
+                    <div class="post-detail-header">
+                        <div class="post-detail-title-row">
+                            <h1 class="post-detail-title">${escapeHtml(post.title)}</h1>
+                            <div class="header-actions">
+                                <button class="btn btn-secondary btn-small like-btn" onclick="toggleLike(${post.id})">
+                                    ${post.is_liked ? '❤️' : '🤍'}
+                                    <span>${post.like_count || 0}</span>
+                                </button>
+                                ${!isAuthor ? `
+                                    <button class="btn btn-secondary btn-small" id="reportBtn" onclick="showReportModal('post', ${post.id})">🚫 举报</button>
+                                ` : ''}
+                                ${isAuthor || isAdmin ? `
+                                    <button class="btn btn-danger btn-small" onclick="deletePost(${post.id})">删除</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="post-detail-meta">
+                            <span class="post-author">
+                                👤 ${escapeHtml(post.username)}
+                            </span>
+                            <span class="post-date">📅 ${formatDate(post.created_at)}</span>
+                            <span class="post-category">📂 ${escapeHtml(post.category || '交流')}</span>
+                            <span class="post-views">👁️ ${post.view_count || 0} 浏览</span>
+                        </div>
+                    </div>
+
+                    ${imageUrl ? `
+                        <div class="post-detail-image">
+                            <img src="${imageUrl}" alt="帖子图片" style="max-width: 100%; border-radius: 8px;">
+                        </div>
+                    ` : ''}
+
+                    <div class="post-detail-body">
+                        <div class="post-content post-content-detail ${isLongContent ? 'collapsed' : ''}" id="postContent">${content}</div>
+                        ${isLongContent ? `
+                            <button class="btn btn-link expand-btn" onclick="toggleContent()">
+                                <span id="expandIcon">📖</span>
+                                <span id="expandText">展开全文</span>
+                            </button>
+                        ` : ''}
+                    </div>
+
+                    <div class="post-detail-footer">
+                    </div>
+                </div>
+            `;
+        }
+
+        // 加载评论
+        async function loadComments(postId) {
+            try {
+                const headers = {};
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                const response = await fetch(`${API_BASE}/posts/${postId}/comments`, {
+                    method: 'GET',
+                    headers: headers
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    renderComments(data);
+                } else {
+                    throw new Error(data.error || '加载失败');
+                }
+            } catch (error) {
+                console.error('加载评论失败:', error);
+                document.getElementById('commentsList').innerHTML = `
+                    <div class="empty-state" style="padding: 20px; text-align: center; color: #999;">
+                        <p>加载评论失败</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 渲染评论列表
+        function renderComments(comments) {
+            document.getElementById('commentCount').textContent = comments.length;
+
+            if (comments.length === 0) {
+                document.getElementById('commentsList').innerHTML = `
+                    <div class="empty-state" style="padding: 20px; text-align: center; color: #999;">
+                        <p>暂无评论，快来发表第一条评论吧！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('commentsList').innerHTML = comments.map(comment => `
+                <div class="comment-item" id="comment-${comment.id}">
+                    <div class="comment-header">
+                        <span class="comment-author">
+                            👤 ${escapeHtml(comment.username)}
+                        </span>
+                        <span class="comment-date">
+                            📅 ${formatDate(comment.created_at)}
+                        </span>
+                    </div>
+                    <div class="comment-content">
+${escapeHtml(comment.content)}
+                    </div>
+                    <div class="comment-actions">
+                        <button class="btn btn-small comment-like-btn" onclick="toggleCommentLike(${comment.id})">
+                            ${comment.is_liked ? '❤️' : '🤍'}
+                            <span>${comment.like_count || 0}</span>
+                        </button>
+                        <button class="btn btn-small" onclick="showReplyForm(${comment.id})">💬 回复</button>
+                        <button class="btn btn-small" onclick="deleteComment(${comment.id})">删除</button>
+                    </div>
+                    <div class="reply-form" id="replyForm-${comment.id}" style="display: none;">
+                        <textarea class="reply-textarea" id="replyContent-${comment.id}" rows="2" placeholder="回复评论..."></textarea>
+                        <div class="reply-form-actions">
+                            <button class="btn btn-small btn-secondary" onclick="hideReplyForm(${comment.id})">取消</button>
+                            <button class="btn btn-small btn-primary" onclick="submitReply(${comment.id})">发送</button>
+                        </div>
+                    </div>
+                    <div class="replies" id="replies-${comment.id}">
+                        ${comment.replies ? renderReplies(comment.replies) : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 发表评论
+        async function submitComment() {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const content = document.getElementById('commentContent').value.trim();
+            if (!content) {
+                alert('请输入评论内容');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/posts/${currentPostId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('评论发表成功');
+                    document.getElementById('commentContent').value = '';
+                    loadComments(currentPostId); // 重新加载评论列表
+                } else {
+                    alert(data.error || '评论发表失败');
+                }
+            } catch (error) {
+                console.error('评论发表失败:', error);
+                alert('评论发表失败，请检查网络连接');
+            }
+        }
+
+        // 删除帖子
+        function deletePost(postId) {
+            if (!confirm('确定要删除这个帖子吗？此操作不可恢复！')) {
+                return;
+            }
+
+            fetch(`${API_BASE}/posts/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            }).then(response => {
+                if (response.ok) {
+                    alert('帖子删除成功');
+                    window.location.href = 'forum.html';
+                } else {
+                    response.json().then(data => alert(data.error || '删除失败'));
+                }
+            });
+        }
+
+        // 删除评论
+        function deleteComment(commentId) {
+            if (!confirm('确定要删除这条评论吗？')) {
+                return;
+            }
+
+            fetch(`${API_BASE}/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            }).then(response => {
+                if (response.ok) {
+                    alert('评论删除成功');
+                    loadComments(currentPostId); // 重新加载评论列表
+                } else {
+                    response.json().then(data => alert(data.error || '删除失败'));
+                }
+            });
+        }
+
+        // 切换点赞
+        async function toggleLike(postId) {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/posts/${postId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    loadPostDetail(currentPostId); // 重新加载帖子详情
+                } else {
+                    alert('操作失败');
+                }
+            } catch (error) {
+                console.error('点赞操作失败:', error);
+                alert('操作失败，请检查网络连接');
+            }
+        }
+
+        // 格式化日期
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = now - date;
+
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return '刚刚';
+            if (minutes < 60) return `${minutes}分钟前`;
+            if (hours < 24) return `${hours}小时前`;
+            if (days < 7) return `${days}天前`;
+
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 切换内容展开/折叠
+        function toggleContent() {
+            const contentEl = document.getElementById('postContent');
+            const expandText = document.getElementById('expandText');
+            const expandIcon = document.getElementById('expandIcon');
+
+            if (contentEl.classList.contains('collapsed')) {
+                // 展开
+                contentEl.classList.remove('collapsed');
+                contentEl.textContent = escapeHtml(currentPost.content);
+                expandText.textContent = '收起内容';
+                expandIcon.textContent = '📕';
+            } else {
+                // 折叠
+                contentEl.classList.add('collapsed');
+                contentEl.textContent = escapeHtml(currentPost.content);
+                expandText.textContent = '展开全文';
+                expandIcon.textContent = '📖';
+            }
+        }
+
+        // 渲染回复列表
+        function renderReplies(replies) {
+            return replies.map(reply => `
+                <div class="reply-item" id="reply-${reply.id}">
+                    <div class="reply-header">
+                        <div class="reply-user">
+                            <span class="reply-author">
+                                👤 ${escapeHtml(reply.username)}
+                            </span>
+                            <span class="reply-date">
+                                📅 ${formatDate(reply.created_at)}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="reply-content">
+${escapeHtml(reply.content)}
+                    </div>
+                    <div class="reply-actions">
+                        <button class="btn btn-small comment-like-btn" onclick="toggleCommentLike(${reply.id})">
+                            ${reply.is_liked ? '❤️' : '🤍'}
+                            <span>${reply.like_count || 0}</span>
+                        </button>
+                        <button class="btn btn-small" onclick="showReplyForm(${reply.id})">💬 回复</button>
+                        <button class="btn btn-small" onclick="deleteComment(${reply.id})">删除</button>
+                    </div>
+                    <div class="reply-form" id="replyForm-${reply.id}" style="display: none;">
+                        <textarea class="reply-textarea" id="replyContent-${reply.id}" rows="2" placeholder="回复评论..."></textarea>
+                        <div class="reply-form-actions">
+                            <button class="btn btn-small btn-secondary" onclick="hideReplyForm(${reply.id})">取消</button>
+                            <button class="btn btn-small btn-primary" onclick="submitReply(${reply.id})">发送</button>
+                        </div>
+                    </div>
+                    <div class="replies" id="replies-${reply.id}">
+                        ${reply.replies ? renderReplies(reply.replies) : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 切换评论点赞
+        async function toggleCommentLike(commentId) {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/comments/${commentId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    loadComments(currentPostId); // 重新加载评论列表
+                } else {
+                    alert('操作失败');
+                }
+            } catch (error) {
+                console.error('点赞操作失败:', error);
+                alert('操作失败，请检查网络连接');
+            }
+        }
+
+        // 显示回复表单
+        function showReplyForm(commentId) {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById(`replyForm-${commentId}`).style.display = 'block';
+
+            // 为回复输入框添加回车提交功能
+            const replyTextarea = document.getElementById(`replyContent-${commentId}`);
+            if (replyTextarea) {
+                // 移除旧的监听器(如果存在)
+                replyTextarea.removeEventListener('keypress', handleReplyKeyPress);
+                // 添加新的监听器
+                replyTextarea.addEventListener('keypress', handleReplyKeyPress);
+            }
+        }
+
+        // 处理回复输入框的回车事件
+        function handleReplyKeyPress(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                // 从textarea ID中提取commentId
+                const textareaId = e.target.id;
+                const match = textareaId.match(/replyContent-(\d+)/);
+                if (match) {
+                    const commentId = parseInt(match[1]);
+                    submitReply(commentId);
+                }
+            }
+        }
+
+        // 隐藏回复表单
+        function hideReplyForm(commentId) {
+            document.getElementById(`replyForm-${commentId}`).style.display = 'none';
+            document.getElementById(`replyContent-${commentId}`).value = '';
+        }
+
+        // 提交回复
+        async function submitReply(commentId) {
+            const content = document.getElementById(`replyContent-${commentId}`).value.trim();
+            if (!content) {
+                alert('请输入回复内容');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/comments/${commentId}/replies`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('回复发表成功');
+                    hideReplyForm(commentId);
+                    loadComments(currentPostId); // 重新加载评论列表
+                } else {
+                    alert(data.error || '回复发表失败');
+                }
+            } catch (error) {
+                console.error('回复发表失败:', error);
+                alert('回复发表失败，请检查网络连接');
+            }
+        }
+
+        // 显示举报弹窗
+        function showReportModal(targetType, targetId) {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const modal = document.getElementById('reportModal');
+            const submitBtn = document.getElementById('submitReportBtn');
+
+            // 设置提交按钮的点击事件
+            submitBtn.onclick = function() {
+                submitReport(targetType, targetId);
+            };
+
+            modal.classList.add('show');
+
+            // 为举报原因输入框添加回车提交功能
+            const reportTextarea = document.getElementById('reportReason');
+            if (reportTextarea) {
+                reportTextarea.removeEventListener('keypress', handleReportKeyPress);
+                reportTextarea.addEventListener('keypress', handleReportKeyPress);
+            }
+        }
+
+        // 处理举报输入框的回车事件
+        function handleReportKeyPress(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const submitBtn = document.getElementById('submitReportBtn');
+                if (submitBtn) {
+                    submitBtn.click();
+                }
+            }
+        }
+
+        // 关闭举报弹窗
+        function closeReportModal() {
+            const modal = document.getElementById('reportModal');
+            modal.classList.remove('show');
+            document.getElementById('reportReason').value = '';
+        }
+
+        // 提交举报
+        async function submitReport(targetType, targetId) {
+            const reason = document.getElementById('reportReason').value.trim();
+            if (!reason) {
+                alert('请填写举报原因');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/report`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        target_type: targetType,
+                        target_id: targetId,
+                        reason: reason
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('举报提交成功！');
+                    closeReportModal();
+
+                    // 禁用举报按钮
+                    const reportBtn = document.getElementById('reportBtn');
+                    if (reportBtn) {
+                        reportBtn.disabled = true;
+                        reportBtn.textContent = '✓ 已举报';
+                    }
+                } else {
+                    alert(data.error || '举报失败');
+                }
+            } catch (error) {
+                console.error('举报失败:', error);
+                alert('举报失败，请稍后重试');
+            }
+        }
+    </script>
+</body>
+</html>

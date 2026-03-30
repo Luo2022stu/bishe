@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园失物招领系统 - 首页</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🎒 校园失物招领系统</h1>
+                    <p class="subtitle">帮助失物找到主人，让爱心传递</p>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <button class="btn btn-secondary" onclick="window.location.href='login.html'">登录 / 注册</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="function-cards">
+                <div class="function-card" onclick="window.location.href='found.html'">
+                    <div class="card-icon">🔍</div>
+                    <h3>失物招领</h3>
+                    <p>发布您拾到的物品，帮助失物找到主人</p>
+                    <button class="btn btn-primary">进入</button>
+                </div>
+
+                <div class="function-card" onclick="window.location.href='lost.html'">
+                    <div class="card-icon">📢</div>
+                    <h3>失物找寻</h3>
+                    <p>发布您丢失的物品，让更多人帮您寻找</p>
+                    <button class="btn btn-primary">进入</button>
+                </div>
+
+                <div class="function-card" onclick="window.location.href='items.html'">
+                    <div class="card-icon">📋</div>
+                    <h3>物品列表</h3>
+                    <p>查看所有招领和找寻的物品信息</p>
+                    <button class="btn btn-primary">进入</button>
+                </div>
+            </div>
+
+            <div class="stats-section compact">
+                <h3>📊 系统统计</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="statFound">0</div>
+                        <div class="stat-label">招领物品</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="statLost">0</div>
+                        <div class="stat-label">找寻物品</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="statUsers">0</div>
+                        <div class="stat-label">注册用户</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 加载统计数据
+        document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
+</html>

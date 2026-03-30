@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物品列表 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        
+        <header>
+            <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>📋 物品列表  <span class="subtitle">浏览所有招领和找寻物品</span></h1>
+                </div>
+            <div class="user-info" id="userInfo">
+                <button class="btn btn-secondary" onclick="window.location.href='login.html'">登录 / 注册</button>
+            </div>
+
+            <div class="user-dropdown" id="userDropdown" style="display: none;">
+                <div class="user-dropdown-btn">
+                    <span class="user-icon">👤</span>
+                    <span class="user-name" id="userName">用户名</span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="user-dropdown-menu">
+                    <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                        <span class="dropdown-icon">👤</span>
+                        <span>个人中心</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='chat.html'">
+                        <span class="dropdown-icon">💬</span>
+                        <span>聊天</span>
+                        <span class="notification-badge-small" id="chatBadge" style="display: none;">0</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='notifications.html'">
+                        <span class="dropdown-icon">🔔</span>
+                        <span>消息</span>
+                        <span class="notification-badge-small" id="dropdownNotificationBadge" style="display: none;">0</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                        <span class="dropdown-icon">⚙️</span>
+                        <span>设置</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item danger" onclick="logout()">
+                        <span class="dropdown-icon">🚪</span>
+                        <span>退出登录</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="list-section">
+                <div class="list-tabs">
+                    <button class="list-tab-btn active" onclick="switchList('found', event)">🔍 失物招领</button>
+                    <button class="list-tab-btn" onclick="switchList('lost', event)">📢 失物找寻</button>
+                    <button class="list-tab-btn" onclick="window.location.href='smart-match.html'">🎯 智能匹配</button>
+                </div>
+
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="搜索物品名称、地点...">
+                    <select id="categoryFilter">
+                        <option value="">所有类别</option>
+                        <option value="证件类">证件类</option>
+                        <option value="电子设备">电子设备</option>
+                        <option value="书籍文具">书籍文具</option>
+                        <option value="衣物配饰">衣物配饰</option>
+                        <option value="钥匙">钥匙</option>
+                        <option value="其他">其他</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="searchItems()">搜索</button>
+                </div>
+
+                <div id="itemsList" class="items-list">
+                    <!-- 物品列表将在这里动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 页面加载时获取物品列表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+
+            // 如果URL中有type参数，设置当前类型并重新加载
+            if (typeParam && (typeParam === 'found' || typeParam === 'lost')) {
+                currentListType = typeParam;
+
+                // 更新标签按钮状态
+                document.querySelectorAll('.list-tab-btn').forEach(btn => btn.classList.remove('active'));
+                const buttons = document.querySelectorAll('.list-tab-btn');
+                if (typeParam === 'found' && buttons[0]) {
+                    buttons[0].classList.add('active');
+                } else if (typeParam === 'lost' && buttons[1]) {
+                    buttons[1].classList.add('active');
+                }
+
+                // 重新获取物品列表
+                fetchItems(typeParam);
+            }
+
+            // 检查是否有锚点（用于高亮显示物品）
+            if (window.location.hash && window.location.hash.startsWith('#item-')) {
+                const itemId = window.location.hash.replace('#item-', '');
+                setTimeout(() => highlightItem(parseInt(itemId)), 1000);
+            }
+        });
+
+        // 高亮显示指定物品
+        function highlightItem(itemId) {
+            const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+            if (itemElement) {
+                itemElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                itemElement.classList.add('highlighted');
+                // 3秒后移除高亮
+                setTimeout(() => {
+                    itemElement.classList.remove('highlighted');
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>

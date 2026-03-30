@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI图片识别搜索 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .ai-search-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .ai-search-header h1 {
+            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .ai-search-header p {
+            font-size: 1.1em;
+            margin: 0;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .ai-search-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .upload-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            background: #eef2ff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            background: #eef2ff;
+            border-color: #28a745;
+        }
+
+        .upload-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .upload-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .upload-desc {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .preview-section {
+            display: none;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 35px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff3838;
+            transform: translateY(-2px);
+        }
+
+        .result-section {
+            display: none;
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-value {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .loading-section {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-section {
+            display: none;
+            background: #fff5f5;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid #ff4757;
+        }
+
+        .tips-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+        }
+
+        .tips-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tips-section ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .tips-section li {
+            margin-bottom: 8px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 80px 20px 20px;
+            }
+
+            .ai-search-card {
+                padding: 25px;
+            }
+
+            .ai-search-header h1 {
+                font-size: 1.8em;
+            }
+
+            .upload-area {
+                padding: 40px 20px;
+            }
+
+            .upload-icon {
+                font-size: 60px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.history.back()">
+        ← 返回
+    </button>
+
+    <div class="container">
+      
+
+        <div class="ai-search-card">
+            <!-- 上传区域 -->
+            <div class="upload-section" id="uploadSection">
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(this)">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()"
+                     ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-title">点击或拖拽上传图片</div>
+                    <div class="upload-desc">支持 JPG、PNG、WEBP 格式，最大 5MB</div>
+                </div>
+            </div>
+
+            <!-- 预览区域 -->
+            <div class="preview-section" id="previewSection">
+                <img id="previewImage" class="preview-image" src="" alt="预览图片">
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="performAiSearch()">
+                        <span>🔄</span> 开始识别搜索
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearImage()">
+                        <span>🗑️</span> 清除图片
+                    </button>
+                </div>
+            </div>
+
+            <!-- 加载区域 -->
+            <div class="loading-section" id="loadingSection">
+                <div class="loading-spinner"></div>
+                <h3 style="color: #667eea;">AI正在识别图片...</h3>
+                <p style="color: #666;">请稍候，这可能需要几秒钟</p>
+            </div>
+
+            <!-- 识别结果区域 -->
+            <div class="result-section" id="resultSection">
+                <div class="result-title">
+                    <span>✅</span> 识别结果
+                </div>
+                <div id="resultContent"></div>
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="goToSearch()">
+                        <span>🔍</span> 查看搜索结果
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetAll()">
+                        <span>🔄</span> 重新识别
+                    </button>
+                </div>
+            </div>
+
+            <!-- 错误区域 -->
+            <div class="error-section" id="errorSection">
+                <div style="color: #ff4757; font-weight: 600; margin-bottom: 10px;">
+                    ❌ 识别失败
+                </div>
+                <div id="errorMessage" style="color: #666;"></div>
+                <div class="button-group" style="margin-top: 15px;">
+                    <button class="btn btn-secondary" onclick="resetAll()">
+                        <span>🔄</span> 重新上传
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用提示 -->
+        <div class="tips-section">
+            <h3>💡 使用提示</h3>
+            <ul>
+                <li>请确保图片清晰，物品完整可见</li>
+                <li>避免光线过暗或反光</li>
+                <li>建议使用纯色背景，突出物品主体</li>
+                <li>支持多种AI服务：百度AI、腾讯云AI、百度飞桨</li>
+                <li>AI识别后会自动跳转到搜索结果页面</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let imageBase64 = null;
+        let searchKeyword = '';
+
+        // 处理图片上传
+        function handleImageUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // 检查文件类型
+            if (!file.type.startsWith('image/')) {
+                alert('请选择图片文件');
+                return;
+            }
+
+            // 检查文件大小（限制5MB）
+            if (file.size > 5 * 1024 * 1024) {
+                alert('图片大小不能超过5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imageBase64 = e.target.result;
+
+                // 显示预览
+                document.getElementById('previewImage').src = imageBase64;
+                document.getElementById('uploadSection').style.display = 'none';
+                document.getElementById('previewSection').style.display = 'block';
+                document.getElementById('resultSection').style.display = 'none';
+                document.getElementById('errorSection').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 拖拽上传
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('image/')) {
+                    const input = document.getElementById('imageInput');
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    input.files = dataTransfer.files;
+                    handleImageUpload(input);
+                } else {
+                    alert('请上传图片文件');
+                }
+            }
+        }
+
+        // 清除图片
+        function clearImage() {
+            imageBase64 = null;
+            searchKeyword = '';
+            document.getElementById('imageInput').value = '';
+            document.getElementById('uploadSection').style.display = 'block';
+            document.getElementById('previewSection').style.display = 'none';
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('errorSection').style.display = 'none';
+        }
+
+        // 重置所有
+        function resetAll() {
+            clearImage();
+            document.getElementById('loadingSection').style.display = 'none';
+        }
+
+        // 执行AI识别
+        async function performAiSearch() {
+            if (!imageBase64) {
+                alert('请先上传图片');
+                return;
+            }
+
+            // 显示加载状态
+            document.getElementById('loadingSection').style.display = 'block';
+            document.getElementById('previewSection').style.display = 'none';
+
+            try {
+                // 将base64转换为二进制数据
+                const imageBinary = atob(imageBase64.split(',')[1]);
+                const imageArray = new Uint8Array(imageBinary.length);
+                for (let i = 0; i < imageBinary.length; i++) {
+                    imageArray[i] = imageBinary.charCodeAt(i);
+                }
+
+                // 构建FormData
+                const formData = new FormData();
+                const imageBlob = new Blob([imageArray], { type: 'image/jpeg' });
+                formData.append('image', imageBlob);
+                formData.append('filename', 'ai_search_image.jpg');
+
+                // 调用AI识别API
+                const response = await fetch(`${API_BASE}/ai/recognize`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('AI识别失败');
+                }
+
+                const result = await response.json();
+
+                if (!result || !result.category) {
+                    throw new Error('未能识别出物品');
+                }
+
+                // 隐藏加载状态
+                document.getElementById('loadingSection').style.display = 'none';
+
+                // 显示识别结果
+                displayResult(result);
+
+            } catch (error) {
+                console.error('[AI搜索] 识别失败:', error);
+
+                // 隐藏加载状态
+                document.getElementById('loadingSection').style.display = 'none';
+
+                // 显示错误信息
+                const errorSection = document.getElementById('errorSection');
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.innerHTML = `
+                    <div style="margin-bottom: 15px;">${escapeHtml(error.message || '未知错误')}</div>
+                    <div style="font-size: 14px; color: #666;">
+                        <strong>建议：</strong>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>上传更清晰的图片</li>
+                            <li>确保图片中物品完整可见</li>
+                            <li>尝试使用关键词搜索</li>
+                        </ul>
+                    </div>
+                `;
+                errorSection.style.display = 'block';
+            }
+        }
+
+        // 显示识别结果
+        function displayResult(result) {
+            // 构建更精准的搜索关键词
+            searchKeyword = buildSearchKeyword(result);
+
+            let resultHtml = '';
+
+            resultHtml += `
+                <div class="result-item">
+                    <span class="result-label">分类</span>
+                    <span class="result-value">${escapeHtml(result.category)}</span>
+                </div>
+            `;
+
+            if (result.description || result.subcategory) {
+                resultHtml += `
+                    <div class="result-item">
+                        <span class="result-label">描述</span>
+                        <span class="result-value">${escapeHtml(result.description || result.subcategory)}</span>
+                    </div>
+                `;
+            }
+
+            if (result.confidence !== undefined) {
+                const confidencePercent = (result.confidence * 100).toFixed(1);
+                resultHtml += `
+                    <div class="result-item">
+                        <span class="result-label">置信度</span>
+                        <span class="result-value">${confidencePercent}%</span>
+                    </div>
+                `;
+            }
+
+            if (result.ocr_text) {
+                resultHtml += `
+                    <div class="result-item">
+                        <span class="result-label">识别文字</span>
+                        <span class="result-value" style="max-width: 60%; text-align: right;">
+                            ${escapeHtml(result.ocr_text.substring(0, 30))}${result.ocr_text.length > 30 ? '...' : ''}
+                        </span>
+                    </div>
+                `;
+            }
+
+            document.getElementById('resultContent').innerHTML = resultHtml;
+            document.getElementById('resultSection').style.display = 'block';
+        }
+
+        // 构建搜索关键词（优先使用更具体的信息）
+        function buildSearchKeyword(result) {
+            let keywords = [];
+
+            // 1. 优先使用subcategory（更具体的子分类）
+            if (result.subcategory) {
+                keywords.push(result.subcategory);
+            }
+
+            // 2. 添加description中的关键信息
+            if (result.description) {
+                // 如果description不等于subcategory，则添加
+                if (result.description !== result.subcategory) {
+                    keywords.push(result.description);
+                }
+            }
+
+            // 3. 如果有OCR文字识别结果，提取关键词
+            if (result.ocr_text) {
+                // 取OCR识别的前20个字符作为补充
+                const ocrSnippet = result.ocr_text.substring(0, 20);
+                if (ocrSnippet && !keywords.includes(ocrSnippet)) {
+                    keywords.push(ocrSnippet);
+                }
+            }
+
+            // 4. 如果details中有品牌、型号等信息，添加进去
+            if (result.details) {
+                const { brand, model, color, type } = result.details;
+                if (type && !keywords.includes(type)) {
+                    keywords.push(type);
+                }
+                if (brand && !keywords.includes(brand)) {
+                    keywords.push(brand);
+                }
+                if (model && !keywords.includes(model)) {
+                    keywords.push(model);
+                }
+                if (color && !keywords.includes(color)) {
+                    keywords.push(color);
+                }
+            }
+
+            // 5. 如果没有更具体的信息，使用category
+            if (keywords.length === 0) {
+                keywords.push(result.category || '');
+            }
+
+            // 返回前3个最相关的关键词，用空格连接
+            return keywords.slice(0, 3).join(' ').trim() || result.category;
+        }
+
+        // 跳转到搜索结果页面
+        function goToSearch() {
+            if (searchKeyword) {
+                // 检查是否是识别失败的情况
+                const failedKeywords = ['未分类', '无法识别具体物品', '未分类 无法识别具体物品', '未知物品'];
+                const isFailed = failedKeywords.some(keyword => searchKeyword.includes(keyword));
+
+                if (isFailed) {
+                    // AI识别失败，提示用户使用其他方式搜索
+                    alert('AI未能识别出具体的物品类型。您可以：\n\n1. 尝试拍摄更清晰的照片\n2. 使用关键词搜索功能\n3. 手动上传物品信息');
+                    return;
+                }
+
+                const searchUrl = `search-results.html?keyword=${encodeURIComponent(searchKeyword)}&source=ai`;
+                window.location.href = searchUrl;
+            } else {
+                alert('没有可用的搜索关键词');
+            }
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

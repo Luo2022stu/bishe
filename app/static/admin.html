@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员后台 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+
+<body>
+   
+    <div class="admin-container">
+        <!-- 管理员后台头部 -->
+        <header class="admin-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🔧 管理员后台  <span class="subtitle">管理系统数据、用户信息和内容审核</span></h1>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-secondary btn-small" onclick="window.location.href='profile.html'">个人中心</button>
+                    <button class="btn btn-danger btn-small" onclick="logout()">退出登录</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="admin-main">
+            <!-- 侧边栏导航 -->
+            <aside class="admin-sidebar">
+                <nav class="admin-nav">
+                    <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">数据概览</span>
+                    </a>
+                    <a href="#users" class="nav-item" data-page="users">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">用户管理</span>
+                    </a>
+                    <a href="#items" class="nav-item" data-page="items">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-text">物品管理</span>
+                    </a>
+                    <a href="#posts" class="nav-item" data-page="posts">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">帖子管理</span>
+                    </a>
+                    <a href="#feedbacks" class="nav-item" data-page="feedbacks">
+                        <span class="nav-icon">💭</span>
+                        <span class="nav-text">用户反馈</span>
+                    </a>
+                    <a href="#lockers" class="nav-item" data-page="lockers">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-text">存储柜管理</span>
+                    </a>
+                    <a href="#reports" class="nav-item" data-page="reports">
+                        <span class="nav-icon">⚠️</span>
+                        <span class="nav-text">举报审核</span>
+                    </a>
+                    <a href="#announcements" class="nav-item" data-page="announcements">
+                        <span class="nav-icon">📢</span>
+                        <span class="nav-text">系统公告</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- 主内容区 -->
+            <main class="admin-content">
+                <!-- 数据概览页面 -->
+                <div class="admin-page active" id="page-dashboard">
+                    <h2 class="page-title">数据概览</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon stat-users">👥</div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="statsUsers">0</div>
+                                <div class="stat-label">用户总数</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-items">📦</div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="statsItems">0</div>
+                                <div class="stat-label">物品总数</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-posts">💬</div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="statsPosts">0</div>
+                                <div class="stat-label">帖子总数</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-comments">💭</div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="statsComments">0</div>
+                                <div class="stat-label">评论总数</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-lockers">📦</div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="statsLockers">0</div>
+                                <div class="stat-label">存储柜物品</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-feedbacks">💭</div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="statsFeedbacks">0</div>
+                                <div class="stat-label">用户反馈</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-reports">⚠️</div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="statsReports">0</div>
+                                <div class="stat-label">待处理举报</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户管理页面 -->
+                <div class="admin-page" id="page-users">
+                    <h2 class="page-title">用户管理</h2>
+                    <div class="page-filters">
+                        <select class="form-control" id="userFilter" onchange="filterUsers()">
+                            <option value="">所有用户</option>
+                            <option value="user">普通用户</option>
+                            <option value="admin">管理员</option>
+                        </select>
+                        <input type="text" class="form-control" id="userSearch" placeholder="搜索用户名或邮箱..." onkeyup="searchUsers()">
+                    </div>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>邮箱</th>
+                                    <th>手机号</th>
+                                    <th>角色</th>
+                                    <th>注册时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersList">
+                                <tr>
+                                    <td colspan="7" class="text-center">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 用户反馈管理页面 -->
+                <div class="admin-page" id="page-feedbacks">
+                    <h2 class="page-title">用户反馈</h2>
+                    <div class="page-filters">
+                        <select class="form-control" id="feedbackFilter" onchange="filterFeedbacks()">
+                            <option value="">所有状态</option>
+                            <option value="pending">待处理</option>
+                            <option value="replied">已回复</option>
+                        </select>
+                        <button class="btn btn-success" onclick="quickReplyAllPendingFeedbacks()">一键回复所有待处理反馈</button>
+                    </div>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户</th>
+                                    <th>反馈内容</th>
+                                    <th>提交时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="feedbacksList">
+                                <tr>
+                                    <td colspan="6" class="text-center">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 存储柜管理页面 -->
+                <div class="admin-page" id="page-lockers">
+                    <h2 class="page-title">存储柜管理</h2>
+                    <div class="page-filters">
+                        <select class="form-control" id="lockerItemFilter" onchange="filterLockerItems()">
+                            <option value="">所有状态</option>
+                            <option value="pending">待取件</option>
+                            <option value="claimed">已取件</option>
+                            <option value="expired">已过期</option>
+                        </select>
+                    </div>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>柜号</th>
+                                    <th>物品名称</th>
+                                    <th>存入者</th>
+                                    <th>接收人手机</th>
+                                    <th>取件码</th>
+                                    <th>存入时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lockerItemsList">
+                                <tr>
+                                    <td colspan="9" class="text-center">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 举报审核页面 -->
+                <div class="admin-page" id="page-reports">
+                    <div class="page-header">
+                        <h2 class="page-title">举报审核 <button class="btn btn-danger btn-small" onclick="approveAllReports()">⚡ 一键通过所有待处理</button></h2>
+                    </div>
+                    <div class="page-filters">
+                        <select class="form-control" id="reportFilter" onchange="filterReports()">
+                            <option value="">所有状态</option>
+                            <option value="pending">待处理</option>
+                            <option value="processed">已处理</option>
+                        </select>
+                        <select class="form-control" id="reportTypeFilter" onchange="filterReports()">
+                            <option value="">所有类型</option>
+                            <option value="item">物品</option>
+                            <option value="post">帖子</option>
+                        </select>
+                    </div>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>举报类型</th>
+                                    <th>被举报内容</th>
+                                    <th>内容作者</th>
+                                    <th>举报人</th>
+                                    <th>举报原因</th>
+                                    <th>举报时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportsList">
+                                <tr>
+                                    <td colspan="9" class="text-center">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 物品管理页面 -->
+                <div class="admin-page" id="page-items">
+                    <div class="page-header">
+                        <h2 class="page-title">物品管理 <button class="btn btn-success btn-small" onclick="approveAllItems()">⚡ 一键通过所有待审核</button></h2>
+                    </div>
+                    <div class="page-filters">
+                        <select class="form-control" id="itemFilter" onchange="filterItems()">
+                            <option value="">所有状态</option>
+                            <option value="pending">待认领</option>
+                            <option value="claimed">已认领</option>
+                            <option value="returned">已归还</option>
+                            <option value="expired">已过期</option>
+                        </select>
+                        <select class="form-control" id="itemAuditFilter" onchange="filterItems()">
+                            <option value="">所有审核状态</option>
+                            <option value="pending">待审核</option>
+                            <option value="approved">已通过</option>
+                            <option value="rejected">已拒绝</option>
+                        </select>
+                        <select class="form-control" id="itemTypeFilter" onchange="filterItems()">
+                            <option value="">所有类型</option>
+                            <option value="found">招领</option>
+                            <option value="lost">寻物</option>
+                        </select>
+                        <input type="text" class="form-control" id="itemSearch" placeholder="搜索物品名称..." onkeyup="searchItems()">
+                    </div>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>类型</th>
+                                    <th>标题</th>
+                                    <th>类别</th>
+                                    <th>位置</th>
+                                    <th>状态</th>
+                                    <th>审核状态</th>
+                                    <th>发布者</th>
+                                    <th>发布时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsList">
+                                <tr>
+                                    <td colspan="10" class="text-center">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 帖子管理页面 -->
+                <div class="admin-page" id="page-posts">
+                    <div class="page-header">
+                        <h2 class="page-title">帖子管理 <button class="btn btn-success btn-small" onclick="approveAllPosts()">⚡ 一键通过所有待审核</button></h2>
+                    </div>
+                    <div class="page-filters">
+                        <select class="form-control" id="postCategoryFilter" onchange="filterPosts()">
+                            <option value="">所有分类</option>
+                            <option value="失物招领">失物招领</option>
+                            <option value="寻物启事">寻物启事</option>
+                            <option value="失物确认">失物确认</option>
+                            <option value="其他">其他</option>
+                        </select>
+                        <select class="form-control" id="postAuditFilter" onchange="filterPosts()">
+                            <option value="">所有审核状态</option>
+                            <option value="pending">待审核</option>
+                            <option value="approved">已通过</option>
+                            <option value="rejected">已拒绝</option>
+                        </select>
+                        <input type="text" class="form-control" id="postSearch" placeholder="搜索帖子标题..." onkeyup="searchPosts()">
+                    </div>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>标题</th>
+                                    <th>分类</th>
+                                    <th>作者</th>
+                                    <th>浏览</th>
+                                    <th>点赞</th>
+                                    <th>评论</th>
+                                    <th>审核状态</th>
+                                    <th>发布时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="postsList">
+                                <tr>
+                                    <td colspan="10" class="text-center">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 系统公告管理页面 -->
+                <div class="admin-page" id="page-announcements">
+                    <h2 class="page-title">系统公告</h2>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="showCreateAnnouncementModal()">+ 发布新公告</button>
+                        <button class="btn btn-secondary" onclick="loadAnnouncements()">刷新列表</button>
+                    </div>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>标题</th>
+                                    <th>标签</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="announcementsList">
+                                <tr>
+                                    <td colspan="6" class="text-center">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 管理员模态框 -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle"></h3>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let currentPage = 'dashboard';
+        let allUsers = [];
+        let allItems = [];
+        let allPosts = [];
+        let allReports = [];
+
+        // 确保 authToken 和 currentUser 可用
+        if (typeof authToken === 'undefined') {
+            authToken = localStorage.getItem('authToken');
+        }
+        if (typeof currentUser === 'undefined') {
+            currentUser = null;
+        }
+
+        // HTML转义工具函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 时间格式化工具函数
+        function formatTime(timeString) {
+            const date = new Date(timeString);
+            const now = new Date();
+            const diff = now - date;
+
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return '刚刚';
+            if (minutes < 60) return `${minutes}分钟前`;
+            if (hours < 24) return `${hours}小时前`;
+            if (days < 7) return `${days}天前`;
+
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            setupNavigation();
+            checkLoginStatus();
+            setupModalEvents();
+            checkAdminAccess();
+            // 确保没有残留的模态框
+            const modal = document.getElementById('adminModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // 检查管理员权限
+        function checkAdminAccess() {
+            if (authToken) {
+                fetch('/api/auth/user', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('获取用户信息失败');
+                }).then(data => {
+                    currentUser = data.user;
+                    // 检查是否是管理员
+                    if (currentUser.role !== 'admin') {
+                        alert('您没有管理员权限');
+                        window.location.href = 'index.html';
+                    }
+                }).catch(error => {
+                    console.error('获取用户信息失败:', error);
+                });
+            } else {
+                alert('请先登录');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // 设置模态框事件
+        function setupModalEvents() {
+            const modal = document.getElementById('adminModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+            }
+        }
+
+        // 重写 checkLoginStatus，在获取用户信息后检查管理员权限
+        const originalFetchCurrentUser = window.fetchCurrentUser;
+        window.fetchCurrentUser = async function() {
+            await originalFetchCurrentUser();
+            checkAdminAuth();
+            loadDashboardStats();
+        };
+
+        // 检查管理员权限
+        function checkAdminAuth() {
+            if (!authToken || !currentUser || currentUser.role !== 'admin') {
+                alert('您没有权限访问管理后台');
+                window.location.href = 'index.html';
+                return false;
+            }
+            document.getElementById('adminUsername').textContent = currentUser.username;
+            return true;
+        }
+
+        // 设置导航
+        function setupNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = item.dataset.page;
+                    navigateTo(page);
+                });
+            });
+        }
+
+        // 导航到指定页面
+        function navigateTo(page) {
+            currentPage = page;
+
+            // 更新导航状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.page === page) {
+                    item.classList.add('active');
+                }
+            });
+
+            // 更新页面显示
+            document.querySelectorAll('.admin-page').forEach(p => {
+                p.classList.remove('active');
+            });
+            document.getElementById(`page-${page}`).classList.add('active');
+
+            // 等待 token 加载完成后再加载数据
+            if (!authToken) {
+                // 如果 token 还没加载,等待一小段时间后重试
+                setTimeout(() => navigateTo(page), 100);
+                return;
+            }
+
+            // 加载页面数据
+            switch (page) {
+                case 'dashboard':
+                    loadDashboardStats();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'items':
+                    loadItems();
+                    break;
+                case 'posts':
+                    loadPosts();
+                    break;
+                case 'feedbacks':
+                    loadFeedbacks();
+                    break;
+                case 'lockers':
+                    loadLockerItems();
+                    break;
+                case 'reports':
+                    loadReports();
+                    break;
+                case 'announcements':
+                    loadAnnouncements();
+                    break;
+            }
+        }
+
+        // 加载仪表板数据
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('statsUsers').textContent = stats.users_count || 0;
+                    document.getElementById('statsItems').textContent = stats.items_count || 0;
+                    document.getElementById('statsPosts').textContent = stats.posts_count || 0;
+                    document.getElementById('statsComments').textContent = stats.comments_count || 0;
+                    document.getElementById('statsLockers').textContent = stats.locker_items_count || 0;
+                    document.getElementById('statsFeedbacks').textContent = stats.feedbacks_count || 0;
+                    // 计算待处理举报数
+                    const pendingReports = allReports.filter(r => r.status === 'pending').length;
+                    document.getElementById('statsReports').textContent = pendingReports;
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+            }
+        }
+
+        // 加载用户列表
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    allUsers = await response.json();
+                    renderUsers(allUsers);
+                } else {
+                    const error = await response.json();
+                    console.error('加载用户列表失败:', error);
+                    document.getElementById('usersList').innerHTML = `<tr><td colspan="7" class="text-center">加载失败: ${error.error || '未知错误'}</td></tr>`;
+                }
+            } catch (error) {
+                console.error('加载用户列表失败:', error);
+                document.getElementById('usersList').innerHTML = '<tr><td colspan="7" class="text-center">加载失败</td></tr>';
+            }
+        }
+
+        // 渲染用户列表
+        function renderUsers(users) {
+            const tbody = document.getElementById('usersList');
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">暂无用户</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email || '-'}</td>
+                    <td>${user.phone || '-'}</td>
+                    <td>
+                        <span class="badge ${user.role === 'admin' ? 'badge-admin' : 'badge-user'}">
+                            ${user.role === 'admin' ? '管理员' : '用户'}
+                        </span>
+                    </td>
+                    <td>${formatDate(user.created_at)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewUserDetail(${user.id})">详情</button>
+                        <button class="btn btn-sm btn-primary" onclick="editUserRole(${user.id})">角色</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 加载物品列表
+        async function loadItems() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/items`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    allItems = await response.json();
+                    renderItems(allItems);
+                } else {
+                    const error = await response.json();
+                    console.error('加载物品列表失败:', error);
+                    document.getElementById('itemsList').innerHTML = `<tr><td colspan="10" class="text-center">加载失败: ${error.error || '未知错误'}</td></tr>`;
+                }
+            } catch (error) {
+                console.error('加载物品列表失败:', error);
+                document.getElementById('itemsList').innerHTML = '<tr><td colspan="10" class="text-center">加载失败</td></tr>';
+            }
+        }
+
+        // 渲染物品列表
+        function renderItems(items) {
+            const tbody = document.getElementById('itemsList');
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center">暂无物品</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td>${item.id}</td>
+                    <td><span class="badge ${item.type === 'found' ? 'badge-success' : 'badge-warning'}">${item.type === 'found' ? '招领' : '寻物'}</span></td>
+                    <td>${item.title}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.location || '-'}</td>
+                    <td><span class="badge badge-status">${getStatusText(item.status)}</span></td>
+                    <td><span class="badge ${getAuditStatusBadge(item.audit_status)}">${getAuditStatusText(item.audit_status)}</span></td>
+                    <td>${item.username || '-'}</td>
+                    <td>${formatDate(item.created_at)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewItemDetail(${item.id})">详情</button>
+                        <button class="btn btn-sm btn-warning" onclick="changeItemStatus(${item.id})">状态</button>
+                        <button class="btn btn-sm ${item.audit_status === 'pending' ? 'btn-success' : 'btn-secondary'}" onclick="auditItem(${item.id}, 'approved')" ${item.audit_status === 'approved' ? 'disabled' : ''}>通过</button>
+                        <button class="btn btn-sm ${item.audit_status === 'pending' ? 'btn-danger' : 'btn-secondary'}" onclick="auditItem(${item.id}, 'rejected')" ${item.audit_status === 'rejected' ? 'disabled' : ''}>拒绝</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 加载帖子列表
+        async function loadPosts() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/posts`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    allPosts = await response.json();
+                    renderPosts(allPosts);
+                } else {
+                    const error = await response.json();
+                    console.error('加载帖子列表失败:', error);
+                    document.getElementById('postsList').innerHTML = `<tr><td colspan="10" class="text-center">加载失败: ${error.error || '未知错误'}</td></tr>`;
+                }
+            } catch (error) {
+                console.error('加载帖子列表失败:', error);
+                document.getElementById('postsList').innerHTML = '<tr><td colspan="10" class="text-center">加载失败</td></tr>';
+            }
+        }
+
+        // 渲染帖子列表
+        function renderPosts(posts) {
+            const tbody = document.getElementById('postsList');
+            if (posts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center">暂无帖子</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = posts.map(post => `
+                <tr>
+                    <td>${post.id}</td>
+                    <td>${post.title}</td>
+                    <td>${post.category || '-'}</td>
+                    <td>${post.username || '-'}</td>
+                    <td>${post.view_count || 0}</td>
+                    <td>${post.like_count || 0}</td>
+                    <td>${post.comment_count || 0}</td>
+                    <td><span class="badge ${getAuditStatusBadge(post.audit_status)}">${getAuditStatusText(post.audit_status)}</span></td>
+                    <td>${formatDate(post.created_at)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewPostDetail(${post.id})">详情</button>
+                        <button class="btn btn-sm btn-warning" onclick="viewPostComments(${post.id})">评论</button>
+                        <button class="btn btn-sm ${post.audit_status === 'pending' ? 'btn-success' : 'btn-secondary'}" onclick="auditPost(${post.id}, 'approved')" ${post.audit_status === 'approved' ? 'disabled' : ''}>通过</button>
+                        <button class="btn btn-sm ${post.audit_status === 'pending' ? 'btn-danger' : 'btn-secondary'}" onclick="auditPost(${post.id}, 'rejected')" ${post.audit_status === 'rejected' ? 'disabled' : ''}>拒绝</button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePost(${post.id})">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 过滤用户
+        function filterUsers() {
+            const roleFilter = document.getElementById('userFilter').value;
+            let filtered = allUsers;
+            if (roleFilter) {
+                filtered = filtered.filter(u => u.role === roleFilter);
+            }
+            renderUsers(filtered);
+        }
+
+        // 搜索用户
+        function searchUsers() {
+            const keyword = document.getElementById('userSearch').value.toLowerCase();
+            let filtered = allUsers.filter(u =>
+                u.username.toLowerCase().includes(keyword) ||
+                (u.email && u.email.toLowerCase().includes(keyword))
+            );
+            renderUsers(filtered);
+        }
+
+        // 过滤物品
+        function filterItems() {
+            const statusFilter = document.getElementById('itemFilter').value;
+            const auditFilter = document.getElementById('itemAuditFilter').value;
+            const typeFilter = document.getElementById('itemTypeFilter').value;
+            let filtered = allItems;
+            if (statusFilter) {
+                filtered = filtered.filter(i => i.status === statusFilter);
+            }
+            if (auditFilter) {
+                filtered = filtered.filter(i => i.audit_status === auditFilter);
+            }
+            if (typeFilter) {
+                filtered = filtered.filter(i => i.type === typeFilter);
+            }
+            renderItems(filtered);
+        }
+
+        // 搜索物品
+        function searchItems() {
+            const keyword = document.getElementById('itemSearch').value.toLowerCase();
+            let filtered = allItems.filter(i =>
+                i.title.toLowerCase().includes(keyword)
+            );
+            renderItems(filtered);
+        }
+
+        // 过滤帖子
+        function filterPosts() {
+            const categoryFilter = document.getElementById('postCategoryFilter').value;
+            const auditFilter = document.getElementById('postAuditFilter').value;
+            let filtered = allPosts;
+            if (categoryFilter) {
+                filtered = filtered.filter(p => p.category === categoryFilter);
+            }
+            if (auditFilter) {
+                filtered = filtered.filter(p => p.audit_status === auditFilter);
+            }
+            renderPosts(filtered);
+        }
+
+        // 搜索帖子
+        function searchPosts() {
+            const keyword = document.getElementById('postSearch').value.toLowerCase();
+            let filtered = allPosts.filter(p =>
+                p.title.toLowerCase().includes(keyword)
+            );
+            renderPosts(filtered);
+        }
+
+        // 编辑用户角色
+        function editUserRole(userId) {
+            const newRole = prompt('请输入新角色 (user/admin):');
+            if (newRole && (newRole === 'user' || newRole === 'admin')) {
+                fetch(`${API_BASE}/admin/users/${userId}/role`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ role: newRole })
+                }).then(response => {
+                    if (response.ok) {
+                        alert('角色更新成功');
+                        loadUsers();
+                    } else {
+                        alert('角色更新失败');
+                    }
+                });
+            }
+        }
+
+        // 查看物品详情
+        function viewItemDetail(itemId) {
+            alert('物品详情功能开发中...');
+        }
+
+        // 查看帖子详情
+        function viewPostDetail(postId) {
+            alert('帖子详情功能开发中...');
+        }
+
+        // 格式化日期
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // 获取状态文本
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': '待认领',
+                'claimed': '已认领',
+                'returned': '已归还',
+                'expired': '已过期'
+            };
+            return statusMap[status] || status;
+        }
+
+        // 获取审核状态文本
+        function getAuditStatusText(status) {
+            const statusMap = {
+                'pending': '待审核',
+                'approved': '已通过',
+                'rejected': '已拒绝'
+            };
+            return statusMap[status] || status;
+        }
+
+        // 获取审核状态徽章样式
+        function getAuditStatusBadge(status) {
+            const badgeMap = {
+                'pending': 'badge-warning',
+                'approved': 'badge-success',
+                'rejected': 'badge-danger'
+            };
+            return badgeMap[status] || 'badge-secondary';
+        }
+
+        // 审核物品
+        async function auditItem(itemId, status) {
+            if (!confirm(`确定要${status === 'approved' ? '通过' : '拒绝'}这个物品吗？`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/items/${itemId}/audit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (response.ok) {
+                    alert('审核操作成功');
+                    loadItems(); // 重新加载物品列表
+                } else {
+                    const error = await response.json();
+                    alert(`审核失败: ${error.error || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('审核物品失败:', error);
+                alert('审核失败，请检查网络连接');
+            }
+        }
+
+        // 一键通过所有待审核物品
+        async function approveAllItems() {
+            const pendingItems = allItems.filter(i => i.audit_status === 'pending');
+            if (pendingItems.length === 0) {
+                alert('没有待审核的物品');
+                return;
+            }
+
+            if (!confirm(`确定要全部通过 ${pendingItems.length} 个待审核的物品吗？`)) return;
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const item of pendingItems) {
+                try {
+                    const response = await fetch(`${API_BASE}/admin/items/${item.id}/audit`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: JSON.stringify({ status: 'approved' })
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+                } catch (error) {
+                    console.error('审核物品失败:', item.id, error);
+                    failCount++;
+                }
+            }
+
+            alert(`审核完成！成功: ${successCount} 个，失败: ${failCount} 个`);
+            loadItems(); // 重新加载物品列表
+        }
+
+        // 审核帖子
+        async function auditPost(postId, status) {
+            if (!confirm(`确定要${status === 'approved' ? '通过' : '拒绝'}这个帖子吗？`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/posts/${postId}/audit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (response.ok) {
+                    alert('审核操作成功');
+                    loadPosts(); // 重新加载帖子列表
+                } else {
+                    const error = await response.json();
+                    alert(`审核失败: ${error.error || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('审核帖子失败:', error);
+                alert('审核失败，请检查网络连接');
+            }
+        }
+
+        // 一键通过所有待审核帖子
+        async function approveAllPosts() {
+            const pendingPosts = allPosts.filter(p => p.audit_status === 'pending');
+            if (pendingPosts.length === 0) {
+                alert('没有待审核的帖子');
+                return;
+            }
+
+            if (!confirm(`确定要全部通过 ${pendingPosts.length} 个待审核的帖子吗？`)) return;
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const post of pendingPosts) {
+                try {
+                    const response = await fetch(`${API_BASE}/admin/posts/${post.id}/audit`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: JSON.stringify({ status: 'approved' })
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+                } catch (error) {
+                    console.error('审核帖子失败:', post.id, error);
+                    failCount++;
+                }
+            }
+
+            alert(`审核完成！成功: ${successCount} 个，失败: ${failCount} 个`);
+            loadPosts(); // 重新加载帖子列表
+        }
+
+        // ==================== 用户管理功能 ====================
+
+        // 查看用户详情
+        async function viewUserDetail(userId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/users/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    const stats = user.stats || {};
+
+                    const detailHtml = `
+                        <div style="padding: 20px;">
+                            <h3>用户详情</h3>
+                            <p><strong>ID:</strong> ${user.id}</p>
+                            <p><strong>用户名:</strong> ${user.username}</p>
+                            <p><strong>邮箱:</strong> ${user.email || '-'}</p>
+                            <p><strong>手机号:</strong> ${user.phone || '-'}</p>
+                            <p><strong>角色:</strong> ${user.role === 'admin' ? '管理员' : '用户'}</p>
+                            <p><strong>注册时间:</strong> ${formatDate(user.created_at)}</p>
+                            <hr>
+                            <h4>用户统计</h4>
+                            <p><strong>发布物品:</strong> ${stats.items_count || 0} 条</p>
+                            <p><strong>发布帖子:</strong> ${stats.posts_count || 0} 条</p>
+                            <p><strong>发表评论:</strong> ${stats.comments_count || 0} 条</p>
+                        </div>
+                    `;
+                    showModal(detailHtml);
+                } else {
+                    const error = await response.json();
+                    console.error('加载用户详情失败:', error);
+                    alert(`加载用户详情失败: ${error.error || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('加载用户详情失败:', error);
+                alert('加载用户详情失败');
+            }
+        }
+
+        // 删除用户
+        function deleteUser(userId) {
+            if (!confirm('确定要删除该用户吗？此操作不可恢复，将删除用户的所有数据！')) {
+                return;
+            }
+
+            fetch(`${API_BASE}/admin/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            }).then(response => {
+                if (response.ok) {
+                    alert('用户删除成功');
+                    loadUsers();
+                    loadDashboardStats();
+                } else {
+                    response.json().then(data => alert(data.error || '删除失败'));
+                }
+            });
+        }
+
+        // ==================== 物品管理功能 ====================
+
+        // 查看物品详情
+        async function viewItemDetail(itemId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/items/${itemId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const item = await response.json();
+                    const typeText = item.type === 'found' ? '招领' : '寻物';
+
+                    const detailHtml = `
+                        <div style="padding: 20px;">
+                            <h3>物品详情</h3>
+                            <p><strong>ID:</strong> ${item.id}</p>
+                            <p><strong>类型:</strong> ${typeText}</p>
+                            <p><strong>标题:</strong> ${item.title}</p>
+                            <p><strong>分类:</strong> ${item.category || '-'}</p>
+                            <p><strong>位置:</strong> ${item.location || '-'}</p>
+                            <p><strong>状态:</strong> ${getStatusText(item.status)}</p>
+                            <p><strong>描述:</strong></p>
+                            <p>${item.description || '无'}</p>
+                            <p><strong>图片:</strong></p>
+                            ${item.image ? `<img src="${item.image}" style="max-width: 300px; max-height: 300px;" />` : '<p>无</p>'}
+                            <p><strong>发布者:</strong> ${item.username || '-'}</p>
+                            <p><strong>发布时间:</strong> ${formatDate(item.created_at)}</p>
+                        </div>
+                    `;
+                    showModal(detailHtml);
+                } else {
+                    const error = await response.json();
+                    console.error('加载物品详情失败:', error);
+                    alert(`加载物品详情失败: ${error.error || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('加载物品详情失败:', error);
+                alert('加载物品详情失败');
+            }
+        }
+
+        // 修改物品状态
+        function changeItemStatus(itemId) {
+            const newStatus = prompt('请选择新状态 (pending/claimed/returned/expired):');
+            if (!newStatus) return;
+
+            const statusMap = { 'pending': 'pending', 'claimed': 'claimed', 'returned': 'returned', 'expired': 'expired' };
+            const statusValue = statusMap[newStatus];
+
+            if (!statusValue) {
+                alert('无效的状态值');
+                return;
+            }
+
+            fetch(`${API_BASE}/admin/items/${itemId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ status: statusValue })
+            }).then(response => {
+                if (response.ok) {
+                    alert('状态更新成功');
+                    loadItems();
+                } else {
+                    response.json().then(data => alert(data.error || '更新失败'));
+                }
+            });
+        }
+
+        // 删除物品
+        function deleteItem(itemId) {
+            if (!confirm('确定要删除该物品吗？此操作不可恢复！')) {
+                return;
+            }
+
+            fetch(`${API_BASE}/admin/items/${itemId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            }).then(response => {
+                if (response.ok) {
+                    alert('物品删除成功');
+                    loadItems();
+                    loadDashboardStats();
+                } else {
+                    response.json().then(data => alert(data.error || '删除失败'));
+                }
+            });
+        }
+
+        // ==================== 帖子管理功能 ====================
+
+        // 查看帖子详情
+        async function viewPostDetail(postId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/posts/${postId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const post = await response.json();
+
+                    const detailHtml = `
+                        <div style="padding: 20px;">
+                            <h3>帖子详情</h3>
+                            <p><strong>ID:</strong> ${post.id}</p>
+                            <p><strong>标题:</strong> ${post.title}</p>
+                            <p><strong>分类:</strong> ${post.category || '-'}</p>
+                            <p><strong>作者:</strong> ${post.username || '-'}</p>
+                            <p><strong>浏览量:</strong> ${post.view_count || 0}</p>
+                            <p><strong>点赞数:</strong> ${post.like_count || 0}</p>
+                            <p><strong>评论数:</strong> ${post.comment_count || 0}</p>
+                            <p><strong>内容:</strong></p>
+                            <p>${post.content || '无'}</p>
+                            <p><strong>发布时间:</strong> ${formatDate(post.created_at)}</p>
+                        </div>
+                    `;
+                    showModal(detailHtml);
+                } else {
+                    const error = await response.json();
+                    console.error('加载帖子详情失败:', error);
+                    alert(`加载帖子详情失败: ${error.error || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('加载帖子详情失败:', error);
+                alert('加载帖子详情失败');
+            }
+        }
+
+        // 查看帖子评论
+        async function viewPostComments(postId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/posts/${postId}/comments`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const comments = await response.json();
+
+                    if (comments.length === 0) {
+                        alert('该帖子暂无评论');
+                        return;
+                    }
+
+                    const commentsHtml = `
+                        <div style="padding: 20px;">
+                            <h3>帖子评论</h3>
+                            ${comments.map(comment => `
+                                <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
+                                    <p><strong>${comment.username}:</strong> ${comment.content}</p>
+                                    <p style="font-size: 12px; color: #999;">${formatDate(comment.created_at)}</p>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteComment(${comment.id}, ${postId})">删除评论</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    showModal(commentsHtml);
+                } else {
+                    const error = await response.json();
+                    console.error('加载评论失败:', error);
+                    alert(`加载评论失败: ${error.error || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('加载评论失败:', error);
+                alert('加载评论失败');
+            }
+        }
+
+        // 删除评论
+        function deleteComment(commentId, postId) {
+            if (!confirm('确定要删除该评论吗？')) {
+                return;
+            }
+
+            fetch(`${API_BASE}/admin/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            }).then(response => {
+                if (response.ok) {
+                    alert('评论删除成功');
+                    viewPostComments(postId); // 重新加载评论列表
+                } else {
+                    response.json().then(data => alert(data.error || '删除失败'));
+                }
+            });
+        }
+
+        // 删除帖子
+        function deletePost(postId) {
+            if (!confirm('确定要删除该帖子吗？此操作不可恢复，将同时删除所有评论！')) {
+                return;
+            }
+
+            fetch(`${API_BASE}/admin/posts/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            }).then(response => {
+                if (response.ok) {
+                    alert('帖子删除成功');
+                    loadPosts();
+                    loadDashboardStats();
+                } else {
+                    response.json().then(data => alert(data.error || '删除失败'));
+                }
+            });
+        }
+
+        // ==================== 举报审核功能 ====================
+
+        // 加载举报列表
+        async function loadReports() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/reports`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                const reports = await response.json();
+                allReports = reports;
+                filterReports();
+            } catch (error) {
+                console.error('加载举报失败:', error);
+                alert('加载举报失败');
+            }
+        }
+
+        // 筛选举报
+        function filterReports() {
+            const status = document.getElementById('reportFilter').value;
+            const type = document.getElementById('reportTypeFilter').value;
+            
+            let filtered = allReports;
+            if (status) {
+                filtered = filtered.filter(r => r.status === status);
+            }
+            if (type) {
+                filtered = filtered.filter(r => r.target_type === type);
+            }
+            renderReports(filtered);
+        }
+
+        // 渲染举报列表
+        function renderReports(reports) {
+            const container = document.getElementById('reportsList');
+            if (reports.length === 0) {
+                container.innerHTML = '<tr><td colspan="9" class="text-center">暂无举报记录</td></tr>';
+                return;
+            }
+
+            container.innerHTML = reports.map(report => {
+                const statusBadge = report.status === 'pending' 
+                    ? '<span class="badge badge-warning">待处理</span>'
+                    : '<span class="badge badge-success">已处理</span>';
+                
+                const targetType = report.target_type === 'item' ? '物品' : '帖子';
+                const targetTitle = report.target_info ? report.target_info.title : '已删除';
+                const targetAuthor = report.target_info ? report.target_info.author_name : '未知';
+
+                return `
+                    <tr>
+                        <td>${report.id}</td>
+                        <td>${targetType}</td>
+                        <td>${targetTitle}</td>
+                        <td>${targetAuthor}</td>
+                        <td>${report.reporter_name}</td>
+                        <td>${escapeHtml(report.reason)}</td>
+                        <td>${formatTime(report.created_at)}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            ${report.status === 'pending' ? `
+                                <button class="btn btn-success btn-small" onclick="auditReport(${report.id}, 'approve')">通过</button>
+                                <button class="btn btn-danger btn-small" onclick="auditReport(${report.id}, 'reject')">拒绝</button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 审核举报
+        async function auditReport(reportId, action) {
+            const actionText = action === 'approve' ? '通过' : '拒绝';
+            if (!confirm(`确定要${actionText}该举报吗？`)) {
+                return;
+            }
+
+            const message = action === 'approve'
+                ? '通过后将扣除作者10分信用分（超过10次举报才隐藏内容）'
+                : '拒绝后将保留被举报内容';
+
+            if (!confirm(message)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/reports/${reportId}/audit`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action })
+                });
+
+                if (response.ok) {
+                    alert(`举报${actionText}成功`);
+                    loadReports();
+                    loadDashboardStats();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || '操作失败');
+                }
+            } catch (error) {
+                console.error('审核举报失败:', error);
+                alert('操作失败，请稍后重试');
+            }
+        }
+
+        // 一键通过所有待处理举报
+        async function approveAllReports() {
+            if (!confirm('确定要通过所有待处理的举报吗？\n\n举报成功一次扣除作者10分信用分，超过10次举报才隐藏内容！')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/reports/approve-all`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                alert(data.message || `成功处理 ${data.count || 0} 条举报`);
+                loadReports();
+                loadDashboardStats();
+            } catch (error) {
+                console.error('一键通过失败:', error);
+                alert('操作失败，请稍后重试');
+            }
+        }
+
+        // ==================== 用户反馈功能 ====================
+
+        let allFeedbacks = [];
+
+        // 加载反馈列表
+        async function loadFeedbacks() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/feedbacks`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    allFeedbacks = await response.json();
+                    renderFeedbacks(allFeedbacks);
+                } else {
+                    const error = await response.json();
+                    console.error('加载反馈列表失败:', error);
+                    document.getElementById('feedbacksList').innerHTML = `<tr><td colspan="6" class="text-center">加载失败: ${error.error || '未知错误'}</td></tr>`;
+                }
+            } catch (error) {
+                console.error('加载反馈列表失败:', error);
+                document.getElementById('feedbacksList').innerHTML = '<tr><td colspan="6" class="text-center">加载失败</td></tr>';
+            }
+        }
+
+        // 渲染反馈列表
+        function renderFeedbacks(feedbacks) {
+            const tbody = document.getElementById('feedbacksList');
+            if (feedbacks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">暂无反馈</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = feedbacks.map(feedback => `
+                <tr>
+                    <td>${feedback.id}</td>
+                    <td>${feedback.username || '-'}</td>
+                    <td>${feedback.content.substring(0, 50)}${feedback.content.length > 50 ? '...' : ''}</td>
+                    <td>${formatDate(feedback.created_at)}</td>
+                    <td>
+                        <span class="badge ${feedback.status === 'pending' ? 'badge-warning' : 'badge-success'}">
+                            ${feedback.status === 'pending' ? '待处理' : '已回复'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewFeedbackDetail(${feedback.id})">详情</button>
+                        <button class="btn btn-sm btn-primary" onclick="replyToFeedback(${feedback.id})">回复</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 查看反馈详情
+        function viewFeedbackDetail(feedbackId) {
+            const feedback = allFeedbacks.find(f => f.id === feedbackId);
+            if (!feedback) return;
+
+            const detailHtml = `
+                <div style="padding: 20px;">
+                    <h3>反馈详情</h3>
+                    <p><strong>ID:</strong> ${feedback.id}</p>
+                    <p><strong>用户:</strong> ${feedback.username || '-'}</p>
+                    <p><strong>反馈内容:</strong></p>
+                    <p>${feedback.content}</p>
+                    <p><strong>状态:</strong> ${feedback.status === 'pending' ? '待处理' : '已回复'}</p>
+                    ${feedback.reply ? `<p><strong>管理员回复:</strong></p><p>${feedback.reply}</p>` : ''}
+                    ${feedback.replied_at ? `<p><strong>回复时间:</strong> ${formatDate(feedback.replied_at)}</p>` : ''}
+                    <p><strong>提交时间:</strong> ${formatDate(feedback.created_at)}</p>
+                </div>
+            `;
+            showModal(detailHtml);
+        }
+
+        // 回复反馈
+        function replyToFeedback(feedbackId) {
+            const reply = prompt('请输入回复内容:');
+            if (!reply) return;
+
+            fetch(`${API_BASE}/admin/feedbacks/${feedbackId}/reply`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ reply })
+            }).then(response => {
+                if (response.ok) {
+                    alert('回复成功');
+                    loadFeedbacks();
+                } else {
+                    response.json().then(data => alert(data.error || '回复失败'));
+                }
+            });
+        }
+
+        // 一键回复所有待处理反馈
+        async function quickReplyAllPendingFeedbacks() {
+            // 筛选出所有待处理的反馈
+            const pendingFeedbacks = allFeedbacks.filter(f => f.status === 'pending');
+
+            if (pendingFeedbacks.length === 0) {
+                alert('没有待处理的反馈');
+                return;
+            }
+
+            if (!confirm(`确定要回复所有 ${pendingFeedbacks.length} 条待处理反馈吗？`)) {
+                return;
+            }
+
+            const reply = '感谢你的建议，我们会认真考虑你的诉求';
+            let successCount = 0;
+            let failCount = 0;
+
+            // 逐个回复待处理反馈
+            for (const feedback of pendingFeedbacks) {
+                try {
+                    const response = await fetch(`${API_BASE}/admin/feedbacks/${feedback.id}/reply`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: JSON.stringify({ reply })
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+                } catch (error) {
+                    console.error(`回复反馈 ${feedback.id} 失败:`, error);
+                    failCount++;
+                }
+            }
+
+            alert(`批量回复完成！成功: ${successCount} 条，失败: ${failCount} 条`);
+            loadFeedbacks();
+        }
+
+        // 过滤反馈
+        function filterFeedbacks() {
+            const statusFilter = document.getElementById('feedbackFilter').value;
+            let filtered = allFeedbacks;
+            if (statusFilter) {
+                filtered = filtered.filter(f => f.status === statusFilter);
+            }
+            renderFeedbacks(filtered);
+        }
+
+        // ==================== 存储柜管理功能 ====================
+
+        let allLockerItems = [];
+
+        // 加载存储柜物品列表
+        async function loadLockerItems() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/lockers/items`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    allLockerItems = await response.json();
+                    renderLockerItems(allLockerItems);
+                } else {
+                    const error = await response.json();
+                    console.error('加载存储柜物品失败:', error);
+                    document.getElementById('lockerItemsList').innerHTML = `<tr><td colspan="9" class="text-center">加载失败: ${error.error || '未知错误'}</td></tr>`;
+                }
+            } catch (error) {
+                console.error('加载存储柜物品失败:', error);
+                document.getElementById('lockerItemsList').innerHTML = '<tr><td colspan="9" class="text-center">加载失败</td></tr>';
+            }
+        }
+
+        // 渲染存储柜物品列表
+        function renderLockerItems(items) {
+            const tbody = document.getElementById('lockerItemsList');
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center">暂无存储物品</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.locker_number || '-'}</td>
+                    <td>${item.item_name}</td>
+                    <td>${item.sender_name || '-'}</td>
+                    <td>${item.recipient_phone || '-'}</td>
+                    <td><strong>${item.pickup_code}</strong></td>
+                    <td>${formatDate(item.stored_at)}</td>
+                    <td>
+                        <span class="badge ${item.status === 'pending' ? 'badge-warning' : item.status === 'claimed' ? 'badge-success' : 'badge-danger'}">
+                            ${item.status === 'pending' ? '待取件' : item.status === 'claimed' ? '已取件' : '已过期'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewLockerItemDetail(${item.id})">详情</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 查看存储柜物品详情
+        function viewLockerItemDetail(itemId) {
+            const item = allLockerItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            const detailHtml = `
+                <div style="padding: 20px;">
+                    <h3>存储柜物品详情</h3>
+                    <p><strong>ID:</strong> ${item.id}</p>
+                    <p><strong>柜号:</strong> ${item.locker_number}</p>
+                    <p><strong>柜子位置:</strong> ${item.locker_location}</p>
+                    <p><strong>物品名称:</strong> ${item.item_name}</p>
+                    <p><strong>描述:</strong> ${item.description || '无'}</p>
+                    <p><strong>取件码:</strong> <strong style="font-size: 20px;">${item.pickup_code}</strong></p>
+                    <p><strong>存入者:</strong> ${item.sender_name}</p>
+                    <p><strong>接收人手机:</strong> ${item.recipient_phone || '无'}</p>
+                    <p><strong>状态:</strong> ${item.status === 'pending' ? '待取件' : item.status === 'claimed' ? '已取件' : '已过期'}</p>
+                    <p><strong>存入时间:</strong> ${formatDate(item.stored_at)}</p>
+                    ${item.picked_up_at ? `<p><strong>取出时间:</strong> ${formatDate(item.picked_up_at)}</p>` : ''}
+                    ${item.expires_at ? `<p><strong>过期时间:</strong> ${formatDate(item.expires_at)}</p>` : ''}
+                </div>
+            `;
+            showModal(detailHtml);
+        }
+
+        // 过滤存储柜物品
+        function filterLockerItems() {
+            const statusFilter = document.getElementById('lockerItemFilter').value;
+            let filtered = allLockerItems;
+
+            if (statusFilter === 'expired') {
+                // 筛选已过期：包括状态为expired的，以及pending状态且超过过期时间的
+                const now = new Date();
+                filtered = filtered.filter(item => {
+                    if (item.status === 'expired') return true;
+                    if (item.status !== 'claimed' && item.expires_at) {
+                        const expiresAt = new Date(item.expires_at);
+                        return expiresAt < now;
+                    }
+                    return false;
+                });
+            } else if (statusFilter) {
+                filtered = filtered.filter(i => i.status === statusFilter);
+            }
+
+            renderLockerItems(filtered);
+        }
+
+        // ==================== 通用功能 ====================
+
+        // 显示模态框
+        function showModal(content) {
+            let modal = document.getElementById('adminModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'adminModal';
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;
+                    z-index: 9999;
+                `;
+                // 添加点击遮罩关闭功能
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+                document.body.appendChild(modal);
+            }
+
+            modal.innerHTML = `
+                <div style="background: white; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; border-radius: 8px; padding: 20px;">
+                    ${content}
+                    <button class="btn btn-secondary" style="margin-top: 20px; width: 100%;" onclick="closeModal()">关闭</button>
+                </div>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            const modal = document.getElementById('adminModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // ========== 系统公告管理 ==========
+
+        // 加载系统公告列表
+        async function loadAnnouncements() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/system-notifications`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const notifications = await response.json();
+                    renderAnnouncementsList(notifications);
+                }
+            } catch (error) {
+                console.error('加载公告列表失败:', error);
+            }
+        }
+
+        // 渲染公告列表
+        function renderAnnouncementsList(notifications) {
+            const tbody = document.getElementById('announcementsList');
+
+            if (!notifications || notifications.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">暂无公告</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = notifications.map(notif => `
+                <tr>
+                    <td>${notif.id}</td>
+                    <td>${escapeHtml(notif.title)}</td>
+                    <td><span class="badge">${escapeHtml(notif.tag)}</span></td>
+                    <td>${notif.is_active ? '<span class="badge badge-success">已发布</span>' : '<span class="badge badge-danger">已停用</span>'}</td>
+                    <td>${formatTime(notif.created_at)}</td>
+                    <td>
+                        <button class="btn btn-small ${notif.is_active ? 'btn-warning' : 'btn-success'}" onclick="toggleAnnouncement(${notif.id})">
+                            ${notif.is_active ? '停用' : '启用'}
+                        </button>
+                        <button class="btn btn-small btn-danger" onclick="deleteAnnouncement(${notif.id})">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 显示发布公告弹窗
+        function showCreateAnnouncementModal() {
+            const modal = document.getElementById('adminModal');
+            const title = document.getElementById('modalTitle');
+            const content = document.getElementById('modalContent');
+
+            title.textContent = '发布系统公告';
+            content.innerHTML = `
+                <form id="announcementForm" onsubmit="submitAnnouncement(event)">
+                    <div class="form-group">
+                        <label for="announcementTitle">标题 *</label>
+                        <input type="text" id="announcementTitle" class="form-control" required placeholder="请输入公告标题">
+                    </div>
+                    <div class="form-group">
+                        <label for="announcementTag">标签</label>
+                        <select id="announcementTag" class="form-control">
+                            <option value="公告">公告</option>
+                            <option value="系统">系统</option>
+                            <option value="活动">活动</option>
+                            <option value="紧急">紧急</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="announcementContent">内容 *</label>
+                        <textarea id="announcementContent" class="form-control" rows="6" required placeholder="请输入公告内容"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                        <button type="submit" class="btn btn-primary">发布</button>
+                    </div>
+                </form>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        // 提交公告
+        async function submitAnnouncement(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('announcementTitle').value.trim();
+            const tag = document.getElementById('announcementTag').value;
+            const content = document.getElementById('announcementContent').value.trim();
+
+            if (!title || !content) {
+                alert('请填写标题和内容');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/system-notifications`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        tag,
+                        content
+                    })
+                });
+
+                if (response.ok) {
+                    alert('公告发布成功！');
+                    closeModal();
+                    loadAnnouncements();
+                } else {
+                    const error = await response.json();
+                    alert(error.error || '发布失败');
+                }
+            } catch (error) {
+                console.error('发布公告失败:', error);
+                alert('发布失败，请稍后重试');
+            }
+        }
+
+        // 切换公告状态
+        async function toggleAnnouncement(notifId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/system-notifications/${notifId}/toggle`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('状态更新成功');
+                    loadAnnouncements();
+                } else {
+                    alert('操作失败');
+                }
+            } catch (error) {
+                console.error('更新公告状态失败:', error);
+                alert('操作失败，请稍后重试');
+            }
+        }
+
+        // 删除公告
+        async function deleteAnnouncement(notifId) {
+            if (!confirm('确定要删除这条公告吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/system-notifications/${notifId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('删除成功');
+                    loadAnnouncements();
+                } else {
+                    alert('删除失败');
+                }
+            } catch (error) {
+                console.error('删除公告失败:', error);
+                alert('删除失败，请稍后重试');
+            }
+        }
+
+        // 页面加载时检查 URL 锚点并导航到对应页面
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const hash = window.location.hash.substring(1);
+                if (hash && ['dashboard', 'users', 'items', 'posts', 'feedbacks', 'lockers', 'reports', 'announcements'].includes(hash)) {
+                    navigateTo(hash);
+                }
+            }, 300);
+        });
+    </script>
+</body>
+
+</html>

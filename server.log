@@ -1,0 +1,130 @@
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Serving Flask app 'app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.43.55:5000
+Press CTRL+C to quit
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+ * Debugger is active!
+ * Debugger PIN: 328-255-115
+ * Detected change in 'd:\\BiShe\\app\\app.py', reloading
+ * Restarting with stat
+[√] 使用 SQLite 数据库: d:\BiShe\app\lost_found.db
+Traceback (most recent call last):
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: no such column: user.credit_score
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "d:\BiShe\app\app.py", line 471, in <module>
+    admin = User.query.filter_by(username='admin').first()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\orm\query.py", line 2759, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\orm\query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\罗冬梅\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: user.credit_score
+[SQL: SELECT user.id AS user_id, user.username AS user_username, user.password AS user_password, user.email AS user_email, user.phone AS user_phone, user.role AS user_role, user.credit_score AS user_credit_score, user.is_muted AS user_is_muted, user.muted_until AS user_muted_until, user.created_at AS user_created_at 
+FROM user 
+WHERE user.username = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('admin', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物品列表 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🎒 校园失物招领系统</h1>
+                    <p class="subtitle">物品列表</p>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <button class="btn btn-secondary" onclick="window.location.href='login.html'">登录 / 注册</button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item">🏠 首页</a>
+            <a href="found.html" class="nav-item">🔍 失物招领</a>
+            <a href="lost.html" class="nav-item">📢 失物找寻</a>
+            <a href="items.html" class="nav-item active">📋 物品列表</a>
+        </nav>
+
+        <div class="main-content">
+            <div class="list-section">
+                <div class="list-tabs">
+                    <button class="list-tab-btn active" onclick="switchList('found')">🔍 失物招领</button>
+                    <button class="list-tab-btn" onclick="switchList('lost')">📢 失物找寻</button>
+                </div>
+
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="搜索物品名称、地点...">
+                    <select id="categoryFilter">
+                        <option value="">所有类别</option>
+                        <option value="证件类">证件类</option>
+                        <option value="电子设备">电子设备</option>
+                        <option value="书籍文具">书籍文具</option>
+                        <option value="衣物配饰">衣物配饰</option>
+                        <option value="钥匙">钥匙</option>
+                        <option value="其他">其他</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="searchItems()">搜索</button>
+                </div>
+
+                <div id="itemsList" class="items-list">
+                    <!-- 物品列表将在这里动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 页面加载时获取物品列表
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchItems('found');
+        });
+    </script>
+</body>
+</html>

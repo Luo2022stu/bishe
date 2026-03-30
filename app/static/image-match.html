@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI图片匹配 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .match-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .match-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .match-header h1 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .match-header p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .upload-area {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 3px dashed #667eea;
+            border-radius: 20px;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background: linear-gradient(135deg, #667eea25 0%, #764ba225 100%);
+            border-color: #764ba2;
+        }
+
+        .upload-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .image-preview {
+            max-width: 400px;
+            max-height: 400px;
+            margin: 20px auto;
+            display: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .recognition-result {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .recognition-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .recognition-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .recognition-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .recognition-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .recognition-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .match-stats {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .match-stats h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.3em;
+        }
+
+        .match-stats-info {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .matched-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .match-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .match-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .match-score {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .match-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .match-type.found {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .match-type.lost {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .match-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .match-reasons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .reason-badge {
+            background: #f0f0f0;
+            color: #666;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        .no-matches {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .no-matches-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #667eea;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <header>
+            <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🖼️ AI图片匹配  <span class="subtitle">上传图片，智能匹配失物招领信息</span></h1>
+                </div>
+                <div class="user-info" id="userInfo">
+                    <button class="btn btn-secondary" onclick="window.location.href='login.html'">登录 / 注册</button>
+                </div>
+
+                <div class="user-dropdown" id="userDropdown" style="display: none;">
+                    <div class="user-dropdown-btn">
+                        <span class="user-icon">👤</span>
+                        <span class="user-name" id="userName">用户名</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="user-dropdown-menu">
+                        <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                            <span class="dropdown-icon">👤</span>
+                            <span>个人中心</span>
+                        </div>
+                        <div class="dropdown-item" onclick="window.location.href='chat.html'">
+                            <span class="dropdown-icon">💬</span>
+                            <span>聊天</span>
+                            <span class="notification-badge-small" id="chatBadge" style="display: none;">0</span>
+                        </div>
+                        <div class="dropdown-item" onclick="window.location.href='notifications.html'">
+                            <span class="dropdown-icon">🔔</span>
+                            <span>消息</span>
+                            <span class="notification-badge-small" id="dropdownNotificationBadge" style="display: none;">0</span>
+                        </div>
+                        <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                            <span class="dropdown-icon">⚙️</span>
+                            <span>设置</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item danger" onclick="logout()">
+                            <span class="dropdown-icon">🚪</span>
+                            <span>退出登录</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="match-container">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">点击上传图片</div>
+                    <div class="upload-hint">支持 JPG、PNG、WEBP 格式</div>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none" onchange="handleImageUpload(event)">
+                </div>
+
+                <img id="imagePreview" class="image-preview" alt="图片预览">
+
+                <div class="recognition-result" id="recognitionResult">
+                    <h3 class="recognition-title">🎯 AI识别结果</h3>
+                    <div class="recognition-info">
+                        <div class="recognition-item">
+                            <div class="recognition-label">识别类别</div>
+                            <div class="recognition-value" id="recogCategory">-</div>
+                        </div>
+                        <div class="recognition-item">
+                            <div class="recognition-label">物品描述</div>
+                            <div class="recognition-value" id="recogDescription">-</div>
+                        </div>
+                        <div class="recognition-item">
+                            <div class="recognition-label">识别服务</div>
+                            <div class="recognition-value" id="recogService">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="match-stats" id="matchStats">
+                    <h3>📊 匹配统计</h3>
+                    <div class="match-stats-info">
+                        <div class="stat-item">
+                            <div class="stat-value" id="matchCount">0</div>
+                            <div class="stat-label">匹配数量</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="maxScore">0%</div>
+                            <div class="stat-label">最高匹配度</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="matchedItems" class="matched-items">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>等待上传图片...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+        });
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // 显示图片预览
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('imagePreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+
+            // 上传并匹配
+            matchItems(file);
+        }
+
+        async function matchItems(file) {
+            const container = document.getElementById('matchedItems');
+            const recognitionResult = document.getElementById('recognitionResult');
+            const matchStats = document.getElementById('matchStats');
+
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>AI正在识别并匹配...</p>
+                </div>
+            `;
+
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch('/api/ai/match-items', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('匹配失败');
+                }
+
+                const data = await response.json();
+
+                // 显示识别结果
+                if (data.recognition_result) {
+                    document.getElementById('recogCategory').textContent = data.recognition_result.category || '-';
+                    document.getElementById('recogDescription').textContent = data.recognition_result.description || '-';
+                    document.getElementById('recogService').textContent = data.service_used || '-';
+                    recognitionResult.style.display = 'block';
+                }
+
+                // 显示匹配统计
+                document.getElementById('matchCount').textContent = data.total_matches || 0;
+                if (data.matched_items && data.matched_items.length > 0) {
+                    document.getElementById('maxScore').textContent = data.matched_items[0].score + '%';
+                } else {
+                    document.getElementById('maxScore').textContent = '0%';
+                }
+                matchStats.style.display = 'block';
+
+                // 显示匹配结果
+                if (data.matched_items && data.matched_items.length > 0) {
+                    container.innerHTML = data.matched_items.map(match => {
+                        const item = match.item;
+                        const typeText = item.type === 'found' ? '招领' : '寻物';
+                        const typeClass = item.type;
+                        return `
+                            <div class="match-card" onclick="viewItemDetail(${item.id})">
+                                <div class="match-header">
+                                    <div class="match-title">${escapeHtml(item.title)}</div>
+                                    <div class="match-score">匹配度: ${match.score}%</div>
+                                </div>
+                                <div>
+                                    <span class="match-type ${typeClass}">${typeText}</span>
+                                </div>
+                                <div class="match-meta">
+                                    <span>📍 ${escapeHtml(item.location || '-')}</span>
+                                    <span>📂 ${escapeHtml(item.category || '-')}</span>
+                                    <span>👤 ${escapeHtml(item.username || '-')}</span>
+                                </div>
+                                <p style="color: #666; font-size: 14px; margin: 10px 0;">${escapeHtml(item.description || '')}</p>
+                                <div class="match-reasons">
+                                    ${match.match_reasons.map(reason =>
+                                        `<span class="reason-badge">${escapeHtml(reason)}</span>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="no-matches">
+                            <div class="no-matches-icon">🔍</div>
+                            <h3>未找到匹配的物品</h3>
+                            <p>AI识别结果: ${escapeHtml(data.recognition_result?.description || '无')}</p>
+                            <p>可以尝试上传更清晰的图片，或者直接搜索关键词</p>
+                            <p style="margin-top: 20px;">
+                                <a href="search-results.html?keyword=${encodeURIComponent(data.recognition_result?.description || '')}" style="color: #667eea; text-decoration: underline;">点击搜索 "${escapeHtml(data.recognition_result?.description || '')}"</a>
+                            </p>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('匹配失败:', error);
+                container.innerHTML = `
+                    <div class="no-matches">
+                        <div class="no-matches-icon">⚠️</div>
+                        <h3>匹配失败</h3>
+                        <p>${error.message}</p>
+                        <p>请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        function viewItemDetail(itemId) {
+            window.location.href = `item-detail.html?id=${itemId}`;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

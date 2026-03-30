@@ -1,0 +1,289 @@
+/* 智能匹配版块样式 */
+.smart-match-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    color: white;
+}
+
+.smart-match-section h2 {
+    color: white;
+    margin: 0 0 8px 0;
+    font-size: 1.3em;
+}
+
+.match-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.match-stats {
+    display: flex;
+    gap: 30px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+}
+
+.smart-match-section .section-desc {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 20px;
+    font-size: 0.9em;
+    text-align: left;
+}
+
+.smart-match-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.smart-match-item {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.smart-match-item:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.match-title {
+    font-weight: 600;
+    font-size: 1em;
+    color: white;
+}
+
+.match-confidence {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: white;
+}
+
+.match-items {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.match-item-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    color: white;
+}
+
+.match-info {
+    margin: 12px 0;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.match-lost-item,
+.match-category,
+.match-location {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.match-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+}
+
+.match-value {
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+}
+
+.match-reasons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* 快速入口版块样式（横向单排，无标题） */
+.quick-access-section {
+    background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    color: white;
+    margin-bottom: 15px;
+}
+
+/* 快速入口简化版（无背景样式） */
+.quick-access-simple {
+    margin: 25px 0 20px 0;
+    padding: 0 10px;
+}
+
+.quick-access-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.quick-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 25px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s;
+    min-width: 140px;
+}
+
+.quick-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+.quick-btn .btn-icon {
+    font-size: 24px;
+}
+
+.quick-btn .btn-text {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* 快速入口简化按钮（无背景样式） */
+.quick-btn-simple {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 2px solid #5a67d8;
+    border-radius: 12px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    min-width: 170px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.quick-btn-simple:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    border-color: #4c51bf;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.quick-btn-simple:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.quick-btn-simple .btn-icon {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.quick-btn-simple .btn-text {
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+}
+
+/* 移动端响应式 */
+@media (max-width: 768px) {
+    .home-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .smart-match-section,
+    .quick-access-section {
+        min-height: 200px;
+    }
+
+    .quick-access-simple {
+        padding: 0;
+        margin: 20px 0;
+    }
+
+    .quick-access-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .quick-btn,
+    .quick-btn-simple {
+        min-width: auto;
+        width: 100%;
+        padding: 12px 30px;
+    }
+
+    .quick-btn-simple .btn-icon {
+        font-size: 24px;
+    }
+
+    .quick-btn-simple .btn-text {
+        font-size: 15px;
+    }
+}
+
+/* 大屏幕优化 */
+@media (min-width: 1200px) {
+    .quick-access-buttons {
+        gap: 25px;
+    }
+
+    .quick-btn-simple {
+        min-width: 180px;
+        padding: 16px 45px;
+    }
+}

@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .account-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+           
+             <div class="back-to-home-btn">
+                <div class="nav-icon">
+                    <a href="index.html" title="首页">🏠</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="found.html" title="失物招领">🔍</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="lost.html" title="失物找寻">📢</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="forum.html" title="社区论坛">💬</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="locker.html" title="智能存储柜">📦</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="feedback.html" title="意见反馈">📝</a>
+                </div>
+            </div>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>👤 个人中心 <span class="subtitle">管理您的个人信息、发布记录和信用体系</span></h1>
+                </div>
+            </div>
+        </header>
+
+        
+
+        <div class="main-content">
+            <!-- 用户信息卡片 -->
+            <div class="profile-header" style="margin-bottom: 30px;">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-info">
+                    <h2 id="profileUsername">加载中...</h2>
+                    <p id="profileEmail">-</p>
+                    <p id="profileRole">-</p>
+                    <p id="profileCreated">-</p>
+                    <div class="credit-score-container">
+                        <span class="credit-label">信用分:</span>
+                        <span class="credit-score" id="creditScore">100</span>
+                        <div class="credit-status" id="creditStatus">正常</div>
+                    </div>
+                    <div id="muteInfo" style="display: none; margin-top: 10px; padding: 10px; background: rgba(255, 87, 34, 0.1); border: 1px solid rgba(255, 87, 34, 0.3); border-radius: 8px;">
+                        <p style="margin: 0; color: #ff5722; font-size: 14px;">⚠️ 您已被禁言，禁言期至: <span id="mutedUntil">-</span></p>
+                    </div>
+                    <div id="adminEntry" style="display: none; margin-top: 10px;">
+                        <button class="btn btn-primary" onclick="window.location.href='admin.html'">🔧 进入管理后台</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 功能选项卡 -->
+            <div class="profile-tabs">
+                <button class="tab-btn active" data-tab="my-items">我的发布</button>
+                <button class="tab-btn" data-tab="my-posts">我的帖子</button>
+                <button class="tab-btn" data-tab="liked">我的点赞</button>
+                <button class="tab-btn" data-tab="browse-history">浏览历史</button>
+                <button class="tab-btn" data-tab="feedback-history">反馈历史</button>
+                <button class="tab-btn" data-tab="settings">设置</button>
+            </div>
+
+            <!-- 我的发布 -->
+            <div class="tab-content active" id="my-items">
+                <div class="section-header">
+                    <h3>我发布的信息</h3>
+                </div>
+                <div id="myItemsList" class="items-list">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 我的帖子 -->
+            <div class="tab-content" id="my-posts">
+                <div class="section-header">
+                    <h3>我发布的帖子</h3>
+                </div>
+                <div id="myPostsList" class="posts-list">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 我的点赞 -->
+            <div class="tab-content" id="liked">
+                <div class="section-header">
+                    <h3>我点赞的帖子</h3>
+                </div>
+                <div id="likedPostsList" class="posts-list">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 浏览历史 -->
+            <div class="tab-content" id="browse-history">
+                <div class="section-header">
+                    <h3>浏览历史</h3>
+                    <button class="btn btn-danger btn-small" onclick="clearHistory()">清空历史</button>
+                </div>
+                <div id="browseHistoryList" class="history-list">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 反馈历史 -->
+            <div class="tab-content" id="feedback-history">
+                <div class="section-header">
+                    <h3>我的反馈</h3>
+                </div>
+                <div id="feedbackHistoryList" class="feedback-list">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 设置 -->
+            <div class="tab-content" id="settings">
+                <!-- 设置子选项卡 -->
+                <div class="settings-tabs">
+                    <button class="settings-tab-btn active" data-settings-tab="preferences">偏好设置</button>
+                    <button class="settings-tab-btn" data-settings-tab="profile-info">个人信息与权限</button>
+                    <button class="settings-tab-btn" data-settings-tab="account-delete">注销账户</button>
+                    <button class="settings-tab-btn" id="authTab" data-settings-tab="auth-login" style="display: none;">登录/注册</button>
+                </div>
+
+                <!-- 偏好设置 -->
+                <div class="settings-tab-content active" id="preferences">
+                    <div class="section-header">
+                        <h3>个人设置</h3>
+                    </div>
+                    <div class="settings-form full">
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="emailNotification">
+                                <span>接收邮件通知</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="smsNotification">
+                                <span>接收短信通知</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showLocation">
+                                <span>公开我的位置信息</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="theme">主题</label>
+                            <select id="theme" class="form-control">
+                                <option value="light">浅色主题</option>
+                                <option value="dark">深色主题</option>
+                                <option value="auto">跟随系统</option>
+                            </select>
+                        </div>
+                        <div class="settings-actions">
+                            <button class="btn btn-primary" onclick="saveSettings()">保存设置</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 个人信息与权限 -->
+                <div class="settings-tab-content" id="profile-info">
+                    <div class="section-header">
+                        <h3>个人信息与权限</h3>
+                    </div>
+                    <div class="settings-form full">
+                        <div class="info-section">
+                            <h4>账号信息</h4>
+                            <div class="info-item">
+                                <span class="info-label">用户名</span>
+                                <span class="info-value" id="infoUsername">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">邮箱</span>
+                                <span class="info-value" id="infoEmail">-</span>
+                                <button class="btn btn-secondary btn-small" onclick="editEmail()">修改</button>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">手机号</span>
+                                <span class="info-value" id="infoPhone">-</span>
+                                <button class="btn btn-secondary btn-small" onclick="editPhone()">修改</button>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">角色</span>
+                                <span class="info-value" id="infoRole">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">注册时间</span>
+                                <span class="info-value" id="infoCreated">-</span>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <h4>权限管理</h4>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="allowDataCollection" checked>
+                                    <span>允许系统收集匿名使用数据以改进服务</span>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="allowPersonalization" checked>
+                                    <span>允许基于使用历史提供个性化推荐</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <h4>数据下载</h4>
+                            
+                            <button class="btn btn-secondary" onclick="downloadMyData()">下载我的数据</button>
+                        </div>
+
+                        <div class="info-section">
+                            <h4>账号操作</h4>
+                            
+                            <div class="account-actions">
+                                <button class="btn btn-warning" onclick="logout()">🚪 退出登录</button>
+                                <button class="btn btn-danger" onclick="switchSettingsTab('account-delete')">🗑️ 注销账号</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 登录/注册 -->
+                <div class="settings-tab-content" id="auth-login">
+                    <div class="section-header">
+                        <h3>登录/注册</h3>
+                    </div>
+                    <div class="auth-buttons">
+                        <button class="btn btn-primary btn-large" onclick="window.location.href='login.html'">
+                            <span class="btn-icon">🔑</span>
+                            登录
+                        </button>
+                        <button class="btn btn-secondary btn-large" onclick="window.location.href='register.html'">
+                            <span class="btn-icon">📝</span>
+                            注册
+                        </button>
+                    </div>
+                    <div class="auth-hint">
+                        <p>登录后可以：</p>
+                        <ul>
+                            <li>发布失物招领信息</li>
+                            <li>参与社区交流讨论</li>
+                            <li>管理个人收藏和浏览历史</li>
+                            <li>使用智能存储柜服务</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 注销账户 -->
+                <div class="settings-tab-content" id="account-delete">
+                    <div class="section-header">
+                        <h3>注销账户</h3>
+                    </div>
+                    <div class="delete-account-section">
+                        <div class="warning-box">
+                            <div class="warning-icon">⚠️</div>
+                            <h4>危险操作警告</h4>
+                            <p class="warning-text">
+                                注销账户将永久删除您的所有数据，包括：
+                            </p>
+                            <ul class="warning-list">
+                                <li>📦 您发布的所有物品信息</li>
+                                <li>💬 您发布的所有帖子</li>
+                                <li>❤️ 您的所有点赞记录</li>
+                                <li>👁️ 您的所有浏览历史</li>
+                                <li>🔔 您的所有反馈记录</li>
+                            </ul>
+                            <p class="warning-text">
+                                此操作<span class="highlight">不可撤销</span>，请谨慎操作！
+                            </p>
+                        </div>
+
+                        <div class="delete-form">
+                            <div class="form-group">
+                                <label for="deleteConfirm">确认操作</label>
+                                <input type="text" id="deleteConfirm" class="form-control"
+                                    placeholder='请输入 "DELETE" 确认删除账户' />
+                            </div>
+                            <div class="form-group">
+                                <label for="deleteReason">删除原因（可选）</label>
+                                <textarea id="deleteReason" class="form-control" rows="3"
+                                    placeholder="请告诉我们您注销账户的原因..."></textarea>
+                            </div>
+                            <button class="btn btn-danger" onclick="deleteAccount()">
+                                永久注销账户
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 个人中心数据
+        let profileData = null;
+
+        // 页面加载时获取个人中心数据
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            loadProfile();
+
+            // 绑定选项卡切换事件
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+            });
+        });
+
+        // 加载个人中心数据
+        async function loadProfile() {
+            // 未登录时显示登录/注册选项
+            if (!authToken) {
+                document.getElementById('authTab').style.display = 'inline-block';
+                switchSettingsTab('auth-login');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    profileData = data;
+                    updateProfileUI(data);
+                } else if (response.status === 401) {
+                    logout();
+                } else {
+                    showError('加载失败');
+                }
+            } catch (error) {
+                console.error('加载失败:', error);
+                showError('加载失败，请检查网络');
+            }
+        }
+
+        // 更新个人中心界面
+        function updateProfileUI(data) {
+            try {
+                if (!data || !data.user) {
+                    console.error('无效的用户数据:', data);
+                    return;
+                }
+
+                // 用户信息
+                const usernameEl = document.getElementById('profileUsername');
+                const emailEl = document.getElementById('profileEmail');
+                const roleEl = document.getElementById('profileRole');
+                const createdEl = document.getElementById('profileCreated');
+
+                if (usernameEl) usernameEl.textContent = data.user.username;
+                if (emailEl) emailEl.textContent = `📧 ${data.user.email}`;
+                if (roleEl) roleEl.textContent = `👤 ${data.user.role === 'admin' ? '管理员' : '普通用户'}`;
+                if (createdEl) createdEl.textContent = `📅 注册于 ${data.user.created_at}`;
+
+                // 信用分
+                const creditScore = data.user.credit_score || 100;
+                const creditScoreEl = document.getElementById('creditScore');
+                const creditStatusEl = document.getElementById('creditStatus');
+                if (creditScoreEl) creditScoreEl.textContent = creditScore;
+
+                // 根据信用分设置状态
+                if (creditStatusEl) {
+                    if (creditScore >= 90) {
+                        creditStatusEl.textContent = '优秀';
+                        creditStatusEl.style.color = '#4CAF50';
+                    } else if (creditScore >= 60) {
+                        creditStatusEl.textContent = '良好';
+                        creditStatusEl.style.color = '#FF9800';
+                    } else if (creditScore > 0) {
+                        creditStatusEl.textContent = '较差';
+                        creditStatusEl.style.color = '#FF5722';
+                    } else {
+                        creditStatusEl.textContent = '已被禁言';
+                        creditStatusEl.style.color = '#f44336';
+                    }
+                }
+
+                // 禁言状态
+                const isMuted = data.user.is_muted;
+                const muteInfoEl = document.getElementById('muteInfo');
+                const mutedUntilEl = document.getElementById('mutedUntil');
+
+                if (muteInfoEl && mutedUntilEl) {
+                    if (isMuted && data.user.muted_until) {
+                        muteInfoEl.style.display = 'block';
+                        mutedUntilEl.textContent = data.user.muted_until;
+                    } else {
+                        muteInfoEl.style.display = 'none';
+                    }
+                }
+
+                // 管理员入口
+                if (data.user.role === 'admin') {
+                    const adminEntryEl = document.getElementById('adminEntry');
+                    if (adminEntryEl) adminEntryEl.style.display = 'block';
+                }
+
+                // 我的发布
+                renderMyItems(data.items || []);
+
+                // 我的帖子
+                renderMyPosts(data.posts || []);
+
+                // 我的点赞
+                renderLikedPosts(data.liked_posts || []);
+
+                // 浏览历史
+                renderBrowseHistory(data.browse_history || []);
+
+                // 加载反馈历史
+                loadFeedbackHistory();
+
+                // 设置 - 只在数据存在时更新
+                if (data.settings) {
+                    updateSettingsUI(data.settings);
+                }
+            } catch (error) {
+                console.error('更新UI失败:', error);
+            }
+        }
+
+        // 渲染我发布的信息
+        function renderMyItems(items) {
+            const container = document.getElementById('myItemsList');
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">📭</div>
+                        <p>还没有发布过信息</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <div class="item-card" onclick="viewItemDetail(${item.id})" style="cursor: pointer;">
+                    <div class="item-header">
+                        <span class="item-badge ${item.type}">${item.type === 'found' ? '失物招领' : '失物找寻'}</span>
+                        <span class="item-date">${formatTime(item.created_at)}</span>
+                    </div>
+                    <h3>${escapeHtml(item.title)}</h3>
+                    <div class="item-meta">
+                        <span>📍 ${escapeHtml(item.location)}</span>
+                        <span>📂 ${escapeHtml(item.category)}</span>
+                    </div>
+                    <div class="item-description">${escapeHtml(item.description)}</div>
+                    <div class="item-status" data-status="${item.status}">
+                        ${getStatusText(item.status)}
+                    </div>
+                    <div class="item-actions" onclick="event.stopPropagation()">
+                        <button class="btn btn-danger btn-small" onclick="deleteMyItem(${item.id}, '${escapeHtml(item.title)}')">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染浏览历史
+        function renderBrowseHistory(history) {
+            const container = document.getElementById('browseHistoryList');
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">👁️</div>
+                        <p>暂无浏览历史</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = history.map(h => {
+                let icon = '📦';
+                let label = '';
+                let clickHandler = '';
+                if (h.item_type === 'found') {
+                    icon = '🔍';
+                    label = '失物招领';
+                    clickHandler = `onclick="viewItemDetail(${h.item_id})"`;
+                } else if (h.item_type === 'lost') {
+                    icon = '📢';
+                    label = '失物找寻';
+                    clickHandler = `onclick="viewItemDetail(${h.item_id})"`;
+                } else if (h.item_type === 'post') {
+                    icon = '💬';
+                    label = '帖子';
+                    clickHandler = `onclick="viewPost(${h.item_id})"`;
+                }
+                return `
+                    <div class="history-item" ${clickHandler} style="cursor: pointer;">
+                        <div class="history-icon">${icon}</div>
+                        <div class="history-info">
+                            <div class="history-title">${escapeHtml(h.title)}</div>
+                            <div class="history-meta">
+                                <span class="history-type">${label}</span>
+                                <span class="history-date">${formatTime(h.viewed_at)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 渲染我发布的帖子
+        function renderMyPosts(posts) {
+            const container = document.getElementById('myPostsList');
+            if (posts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">💬</div>
+                        <p>还没有发布过帖子</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = posts.map(post => `
+                <div class="post-card" onclick="viewPost(${post.id})" style="cursor: pointer;">
+                    <div class="post-header">
+                        <span class="post-category">${escapeHtml(post.category)}</span>
+                        <span class="post-date">${formatTime(post.created_at)}</span>
+                    </div>
+                    <h3>${escapeHtml(post.title)}</h3>
+                    <div class="post-content">${escapeHtml(post.content)}</div>
+                    <div class="post-stats">
+                        <span>👁️ ${post.view_count}</span>
+                        <span>❤️ ${post.like_count}</span>
+                        <span>💬 ${post.comment_count}</span>
+                    </div>
+                    <div class="post-actions" onclick="event.stopPropagation()">
+                        <button class="btn btn-secondary btn-small" onclick="viewMyPost(${post.id})">查看</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteMyPost(${post.id}, '${escapeHtml(post.title)}')">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染点赞的帖子
+        function renderLikedPosts(posts) {
+            const container = document.getElementById('likedPostsList');
+            if (posts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">❤️</div>
+                        <p>还没有点赞过帖子</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = posts.map(post => `
+                <div class="post-card" onclick="viewPost(${post.id})" style="cursor: pointer;">
+                    <div class="post-header">
+                        <span class="post-category">${escapeHtml(post.category)}</span>
+                        <span class="post-date">${formatTime(post.created_at)}</span>
+                    </div>
+                    <h3>${escapeHtml(post.title)}</h3>
+                    <div class="post-content">${escapeHtml(post.content)}</div>
+                    <div class="post-stats">
+                        <span>👁️ ${post.view_count}</span>
+                        <span>❤️ ${post.like_count}</span>
+                        <span>💬 ${post.comment_count}</span>
+                    </div>
+                    <div class="post-actions" onclick="event.stopPropagation()">
+                        <button class="btn btn-secondary btn-small" onclick="viewPost(${post.id})">查看</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 更新设置界面
+        function updateSettingsUI(settings) {
+            if (!settings) return;
+
+            try {
+                document.getElementById('emailNotification').checked = settings.email_notification;
+                document.getElementById('smsNotification').checked = settings.sms_notification;
+                document.getElementById('showLocation').checked = settings.show_location;
+                document.getElementById('theme').value = settings.theme;
+            } catch (error) {
+                console.error('更新设置UI失败:', error);
+            }
+        }
+
+        // 保存设置
+        async function saveSettings() {
+            const settings = {
+                email_notification: document.getElementById('emailNotification').checked,
+                sms_notification: document.getElementById('smsNotification').checked,
+                show_location: document.getElementById('showLocation').checked,
+                theme: document.getElementById('theme').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/profile/settings`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                if (response.ok) {
+                    alert('设置已保存');
+                } else {
+                    alert('保存失败');
+                }
+            } catch (error) {
+                console.error('保存设置失败:', error);
+                alert('保存失败，请检查网络');
+            }
+        }
+
+        // 清空浏览历史
+        async function clearHistory() {
+            if (!confirm('确定要清空浏览历史吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/profile/history`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('浏览历史已清空');
+                    loadProfile(); // 重新加载数据
+                } else {
+                    alert('清空失败');
+                }
+            } catch (error) {
+                console.error('清空历史失败:', error);
+                alert('清空失败，请检查网络');
+            }
+        }
+
+        // 删除我发布的信息
+        async function deleteMyItem(itemId, title) {
+            if (!confirm(`确定要删除"${title}"吗？`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/profile/items/${itemId}/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('删除成功');
+                    loadProfile(); // 重新加载数据
+                } else {
+                    alert('删除失败');
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                alert('删除失败，请检查网络');
+            }
+        }
+
+        // 删除我发布的帖子（保留此函数供renderLikedPosts中使用）
+        async function deleteMyPost(postId, title) {
+            if (!confirm(`确定要删除帖子"${title}"吗？`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/profile/posts/${postId}/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('删除成功');
+                    loadProfile(); // 重新加载数据
+                } else {
+                    alert('删除失败');
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                alert('删除失败，请检查网络');
+            }
+        }
+
+        // 提交意见反馈
+        async function submitFeedback() {
+            const type = document.getElementById('feedbackType').value;
+            const content = document.getElementById('feedbackContent').value.trim();
+
+            if (!content) {
+                alert('请输入反馈内容');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/feedback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        content: `[${type}] ${content}`
+                    })
+                });
+
+                if (response.ok) {
+                    alert('感谢您的反馈！我们会认真考虑您的意见。');
+                    document.getElementById('feedbackContent').value = '';
+                    // 重新加载反馈历史
+                    loadFeedbackHistory();
+                } else {
+                    const error = await response.json();
+                    alert(`提交失败: ${error.error || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('提交反馈失败:', error);
+                alert('提交失败，请稍后重试');
+            }
+        }
+
+        // 加载反馈历史
+        async function loadFeedbackHistory() {
+            try {
+                const response = await fetch(`${API_BASE}/profile/feedbacks`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const feedbacks = await response.json();
+                    renderFeedbackHistory(feedbacks);
+                }
+            } catch (error) {
+                console.error('加载反馈历史失败:', error);
+            }
+        }
+
+        // 渲染反馈历史
+        function renderFeedbackHistory(feedbacks) {
+            const container = document.getElementById('feedbackHistoryList');
+            if (feedbacks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">📋</div>
+                        <p>暂无反馈记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = feedbacks.map(feedback => {
+                const statusIcon = feedback.status === 'replied' ? '✅' : '⏳';
+                const statusText = feedback.status === 'replied' ? '已回复' : '待处理';
+                const statusClass = feedback.status === 'replied' ? 'status-replied' : 'status-pending';
+
+                let replySection = '';
+                if (feedback.reply) {
+                    replySection = `
+                        <div class="feedback-reply">
+                            <div class="reply-header">
+                                <span class="reply-label">📝 管理员回复</span>
+                                <span class="reply-date">${formatTime(feedback.replied_at)}</span>
+                            </div>
+                            <div class="reply-content">${escapeHtml(feedback.reply)}</div>
+                        </div>
+                    `;
+                } else {
+                    replySection = `
+                        <div class="feedback-no-reply">
+                            <p>💬 管理员尚未回复，请耐心等待</p>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="feedback-item">
+                        <div class="feedback-header">
+                            <div class="feedback-status ${statusClass}">
+                                ${statusIcon} ${statusText}
+                            </div>
+                            <span class="feedback-date">${formatTime(feedback.created_at)}</span>
+                        </div>
+                        <div class="feedback-content">${escapeHtml(feedback.content)}</div>
+                        ${replySection}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 查看我发布的帖子
+        function viewMyPost(postId) {
+            localStorage.setItem('pendingPostId', postId);
+            window.location.href = 'forum.html';
+        }
+
+        // 查看帖子
+        function viewPost(postId) {
+            window.location.href = `post-detail.html?id=${postId}`;
+        }
+
+
+        // 切换选项卡
+        function switchTab(tabId) {
+            // 移除所有激活状态
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // 激活选中的选项卡
+            document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            // 如果切换到设置选项卡，初始化设置子选项卡
+            if (tabId === 'settings') {
+                initSettingsTabs();
+            }
+        }
+
+        // 初始化设置子选项卡
+        function initSettingsTabs() {
+            document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchSettingsTab(btn.dataset.settingsTab));
+            });
+        }
+
+        // 切换设置子选项卡
+        function switchSettingsTab(tabId) {
+            // 移除所有激活状态
+            document.querySelectorAll('.settings-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.settings-tab-content').forEach(content => content.classList.remove('active'));
+
+            // 激活选中的选项卡
+            document.querySelector(`.settings-tab-btn[data-settings-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            // 如果切换到个人信息选项卡,更新UI
+            if (tabId === 'profile-info') {
+                updateProfileInfoUI();
+            }
+        }
+
+        // 更新个人信息UI
+        function updateProfileInfoUI() {
+            if (!profileData || !profileData.user) {
+                console.log('[个人信息] profileData 或 user 不存在,跳过更新');
+                return;
+            }
+
+            try {
+                const user = profileData.user;
+                document.getElementById('infoUsername').textContent = user.username || '-';
+                document.getElementById('infoEmail').textContent = user.email || '-';
+                document.getElementById('infoPhone').textContent = user.phone || '未设置';
+                document.getElementById('infoRole').textContent = user.role === 'admin' ? '管理员' : '普通用户';
+                document.getElementById('infoCreated').textContent = user.created_at || '-';
+            } catch (error) {
+                console.error('[个人信息] 更新UI失败:', error);
+            }
+        }
+
+        // 修改邮箱
+        function editEmail() {
+            const newEmail = prompt('请输入新的邮箱地址：');
+            if (!newEmail) return;
+
+            // 简单验证邮箱格式
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(newEmail)) {
+                alert('邮箱格式不正确');
+                return;
+            }
+
+            updateUserInfo({ email: newEmail });
+        }
+
+        // 修改手机号
+        function editPhone() {
+            const newPhone = prompt('请输入新的手机号：');
+            if (!newPhone) return;
+
+            // 简单验证手机号格式
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            if (!phoneRegex.test(newPhone)) {
+                alert('手机号格式不正确');
+                return;
+            }
+
+            updateUserInfo({ phone: newPhone });
+        }
+
+        // 更新用户信息
+        async function updateUserInfo(data) {
+            // 如果没有数据参数，只是更新UI，不调用API
+            if (!data) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/profile/info`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('更新成功');
+                    loadProfile(); // 重新加载数据
+                } else {
+                    const result = await response.json();
+                    alert(result.error || '更新失败');
+                }
+            } catch (error) {
+                console.error('更新失败:', error);
+                alert('更新失败，请检查网络');
+            }
+        }
+
+        // 下载我的数据
+        function downloadMyData() {
+            if (!confirm('确定要下载您的个人数据吗？')) {
+                return;
+            }
+
+            // 创建包含用户数据的对象
+            const userData = {
+                exportDate: new Date().toISOString(),
+                user: profileData.user,
+                items: profileData.items,
+                posts: profileData.posts,
+                likedPosts: profileData.liked_posts,
+                browseHistory: profileData.browse_history
+            };
+
+            // 转换为JSON并下载
+            const dataStr = JSON.stringify(userData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `my_data_${profileData.user.username}_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+
+            URL.revokeObjectURL(url);
+            alert('数据已开始下载');
+        }
+
+        // 注销账户
+        async function deleteAccount() {
+            const confirmText = document.getElementById('deleteConfirm').value;
+            if (confirmText !== 'DELETE') {
+                alert('请输入 "DELETE" 以确认删除账户');
+                return;
+            }
+
+            if (!confirm('⚠️ 您即将永久注销账户，此操作不可撤销！\n\n确定要继续吗？')) {
+                return;
+            }
+
+            const reason = document.getElementById('deleteReason').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/profile/delete`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason: reason })
+                });
+
+                if (response.ok) {
+                    alert('账户已成功注销');
+                    logout();
+                } else {
+                    const result = await response.json();
+                    alert(result.error || '注销失败');
+                }
+            } catch (error) {
+                console.error('注销失败:', error);
+                alert('注销失败，请检查网络');
+            }
+        }
+
+        // 显示错误
+        function showError(message) {
+            document.getElementById('myItemsList').innerHTML = `
+                <div class="empty-state">
+                    <div style="font-size: 60px; margin-bottom: 20px;">⚠️</div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>

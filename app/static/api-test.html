@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-item {
+            margin: 10px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #ccc;
+        }
+        .success { border-left-color: #4CAF50; }
+        .error { border-left-color: #f44336; }
+        .loading { border-left-color: #ff9800; }
+        pre {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>API 测试工具</h1>
+    <div id="results"></div>
+
+    <script>
+        async function testAPI(url, name) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'test-item loading';
+            resultDiv.innerHTML = `<strong>${name}</strong><p>测试中...</p>`;
+            document.getElementById('results').appendChild(resultDiv);
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'test-item success';
+                    resultDiv.innerHTML = `<strong>✅ ${name}</strong><p>状态: ${response.status}</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    resultDiv.className = 'test-item error';
+                    resultDiv.innerHTML = `<strong>❌ ${name}</strong><p>状态: ${response.status}</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.className = 'test-item error';
+                resultDiv.innerHTML = `<strong>❌ ${name}</strong><p>错误: ${error.message}</p>`;
+            }
+        }
+
+        // 测试所有 API
+        testAPI('/api/stats', '系统统计');
+        testAPI('/api/items', '物品列表');
+        testAPI('/api/notifications', '推送通知');
+        testAPI('/api/posts', '帖子列表');
+        testAPI('/api/auth/user', '用户信息');
+    </script>
+</body>
+</html>

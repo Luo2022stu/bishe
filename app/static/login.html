@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录注册 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        
+        <header>
+            <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🎒 校园失物招领系统  <span class="subtitle">帮助失物找到主人，让爱心传递</span></h1>
+                </div>
+            </div>
+        </header>
+
+        <div class="auth-container">
+            <div class="auth-box">
+                <!-- 登录表单 -->
+                <div id="loginForm" class="auth-form">
+                    <h2>🔐 用户登录</h2>
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="loginUsername">用户名</label>
+                            <input type="text" id="loginUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">密码</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">登录</button>
+                        <p class="auth-switch">
+                            还没有账号？<a href="#" onclick="showRegisterForm()">立即注册</a>
+                        </p>
+                        <p class="auth-switch">
+                            <a href="#" onclick="showResetPasswordForm()">忘记密码？</a>
+                        </p>
+                    </form>
+                </div>
+
+                <!-- 注册表单 -->
+                <div id="registerForm" class="auth-form" style="display: none;">
+                    <h2>📝 用户注册</h2>
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="regUsername">用户名 *</label>
+                            <input type="text" id="regUsername" required placeholder="请输入用户名">
+                        </div>
+                        <div class="form-group">
+                            <label for="regRole">用户角色 *</label>
+                            <select id="regRole" required onchange="handleRoleChange()">
+                                <option value="user">普通用户</option>
+                                <option value="admin">管理员</option>
+                            </select>
+                            <p class="role-hint" id="roleHint" style="font-size: 12px; color: #666; margin-top: 5px;">
+                                普通用户：可发布和管理自己的物品信息
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="regPhone">手机号 *</label>
+                            <input type="tel" id="regPhone" required placeholder="请输入手机号" maxlength="11">
+                        </div>
+                        <div class="form-group">
+                            <label for="regCode">验证码 *</label>
+                            <div class="code-input-group">
+                                <input type="text" id="regCode" required placeholder="请输入验证码" maxlength="6">
+                                <button type="button" class="btn btn-code" id="sendCodeBtn" onclick="sendVerificationCode()">
+                                    获取验证码
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="regEmail">邮箱 *</label>
+                            <input type="email" id="regEmail" required placeholder="请输入邮箱">
+                        </div>
+                        <div class="form-group">
+                            <label for="regPassword">密码 *</label>
+                            <input type="password" id="regPassword" required placeholder="请输入密码（至少6位）">
+                        </div>
+                        <div class="form-group">
+                            <label for="regConfirmPassword">确认密码 *</label>
+                            <input type="password" id="regConfirmPassword" required placeholder="请再次输入密码">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">注册</button>
+                        <p class="auth-switch">
+                            已有账号？<a href="#" onclick="showLoginForm()">立即登录</a>
+                        </p>
+                    </form>
+                </div>
+
+                <!-- 重置密码表单 -->
+                <div id="resetPasswordForm" class="auth-form" style="display: none;">
+                    <h2>🔑 重置密码</h2>
+                    <form onsubmit="handleResetPassword(event)">
+                        <div class="form-group">
+                            <label for="resetPhone">手机号 *</label>
+                            <input type="tel" id="resetPhone" required placeholder="请输入注册手机号" maxlength="11" autocomplete="tel">
+                        </div>
+                        <div class="form-group">
+                            <label for="resetCode">验证码 *</label>
+                            <div class="code-input-group">
+                                <input type="text" id="resetCode" required placeholder="请输入验证码" maxlength="6" autocomplete="off">
+                                <button type="button" class="btn btn-code" id="sendResetCodeBtn" onclick="sendResetVerificationCode()">
+                                    获取验证码
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="resetNewPassword">新密码 *</label>
+                            <input type="password" id="resetNewPassword" required placeholder="请输入新密码（至少6位）" minlength="6" autocomplete="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="resetConfirmPassword">确认新密码 *</label>
+                            <input type="password" id="resetConfirmPassword" required placeholder="请再次输入新密码" minlength="6" autocomplete="new-password">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">重置密码</button>
+                        <p class="auth-switch">
+                            <a href="#" onclick="showLoginForm()">返回登录</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 登录成功后跳转
+        function onLoginSuccess() {
+            window.location.href = 'index.html';
+        }
+
+        // 显示重置密码表单
+        function showResetPasswordForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('resetPasswordForm').style.display = 'block';
+        }
+
+        // 重置密码验证码倒计时
+        let resetCountdownTimer = null;
+
+        // 发送重置密码验证码
+        async function sendResetVerificationCode() {
+            const phone = document.getElementById('resetPhone').value;
+
+            // 验证手机号格式
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                alert('请输入正确的手机号格式');
+                return;
+            }
+
+            // 禁用按钮
+            const btn = document.getElementById('sendResetCodeBtn');
+            btn.disabled = true;
+            btn.textContent = '发送中...';
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/send-reset-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phone })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('验证码已发送到您的手机');
+                    // 开始倒计时
+                    let countdown = 60;
+                    btn.disabled = true;
+                    btn.textContent = `${countdown}秒后重试`;
+
+                    resetCountdownTimer = setInterval(() => {
+                        countdown--;
+                        if (countdown <= 0) {
+                            clearInterval(resetCountdownTimer);
+                            btn.disabled = false;
+                            btn.textContent = '获取验证码';
+                        } else {
+                            btn.textContent = `${countdown}秒后重试`;
+                        }
+                    }, 1000);
+                } else {
+                    alert(data.error || '发送验证码失败');
+                    btn.disabled = false;
+                    btn.textContent = '获取验证码';
+                }
+            } catch (error) {
+                console.error('发送验证码失败:', error);
+                alert('发送验证码失败，请检查网络连接');
+                btn.disabled = false;
+                btn.textContent = '获取验证码';
+            }
+        }
+
+        // 处理重置密码
+        async function handleResetPassword(e) {
+            e.preventDefault();
+
+            const phone = document.getElementById('resetPhone').value;
+            const code = document.getElementById('resetCode').value;
+            const newPassword = document.getElementById('resetNewPassword').value;
+            const confirmPassword = document.getElementById('resetConfirmPassword').value;
+
+            // 验证输入
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                alert('请输入正确的手机号格式');
+                return;
+            }
+
+            if (code.length !== 6) {
+                alert('请输入6位验证码');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('密码长度至少6位');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('两次输入的密码不一致');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone,
+                        code,
+                        new_password: newPassword
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('密码重置成功！请使用新密码登录');
+                    // 返回登录表单
+                    showLoginForm();
+                } else {
+                    alert(data.error || '密码重置失败');
+                }
+            } catch (error) {
+                console.error('重置密码失败:', error);
+                alert('密码重置失败，请检查网络连接');
+            }
+        }
+    </script>
+</body>
+</html>

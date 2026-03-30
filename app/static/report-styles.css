@@ -1,0 +1,131 @@
+/* 举报弹窗样式 */
+.report-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.report-modal {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: #fff;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.report-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.report-modal-header h3 {
+    margin: 0;
+    color: #fff;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.report-modal-body {
+    padding: 20px;
+}
+
+.report-modal-body .form-group {
+    margin-bottom: 20px;
+}
+
+.report-modal-body label {
+    display: block;
+    margin-bottom: 8px;
+    color: #cbd5e0;
+    font-weight: 500;
+}
+
+.report-modal-body textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 100px;
+    box-sizing: border-box;
+}
+
+.report-modal-body textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.report-modal-body textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.report-tips {
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.report-tips p {
+    margin: 0 0 10px 0;
+    color: #ff9800;
+    font-weight: 500;
+}
+
+.report-tips ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.report-tips li {
+    margin: 5px 0;
+    color: #e0e0e0;
+    font-size: 13px;
+}
+
+.report-modal-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.report-modal-footer .btn {
+    min-width: 100px;
+}

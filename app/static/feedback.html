@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>意见反馈 - 校园失物招领系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
+          
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>📝 意见反馈  <span class="subtitle">您的意见对我们非常重要</span></h1>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- 意见反馈表单 -->
+            <div class="feedback-section">
+                <div class="section-header">
+                    <h3>提交反馈</h3>
+                </div>
+                <div class="feedback-form">
+                    <p class="feedback-desc">您的意见对我们非常重要，请告诉我们您的想法或建议。</p>
+                    <div class="form-group">
+                        <label for="feedbackType">反馈类型</label>
+                        <select id="feedbackType" class="form-control">
+                            <option value="suggestion">功能建议</option>
+                            <option value="bug">问题反馈</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackContent">反馈内容</label>
+                        <textarea id="feedbackContent" class="form-control" rows="6" placeholder="请详细描述您的意见或建议..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="submitFeedback()">提交反馈</button>
+                </div>
+            </div>
+
+            <!-- 反馈历史记录 -->
+            <div class="feedback-history-section" style="margin-top: 50px;">
+                <div class="section-header">
+                    <h3>📋 我的反馈记录</h3>
+                </div>
+                <div id="feedbackHistoryList" class="feedback-list">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            loadFeedbackHistory();
+
+            // 为反馈内容输入框添加回车提交功能
+            const feedbackContent = document.getElementById('feedbackContent');
+            if (feedbackContent) {
+                feedbackContent.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        submitFeedback();
+                    }
+                });
+            }
+        });
+
+        // 提交反馈
+        async function submitFeedback() {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const feedbackType = document.getElementById('feedbackType').value;
+            const feedbackContent = document.getElementById('feedbackContent').value.trim();
+
+            if (!feedbackContent) {
+                alert('请填写反馈内容');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/feedback`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: feedbackType,
+                        content: feedbackContent
+                    })
+                });
+
+                if (response.ok) {
+                    alert('反馈提交成功！');
+                    document.getElementById('feedbackContent').value = '';
+                    loadFeedbackHistory();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || '提交失败，请稍后重试');
+                }
+            } catch (error) {
+                console.error('提交反馈失败:', error);
+                alert('提交失败，请稍后重试');
+            }
+        }
+
+        // 加载反馈历史
+        async function loadFeedbackHistory() {
+            if (!authToken) {
+                document.getElementById('feedbackHistoryList').innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">🔒</div>
+                        <p>请先登录查看反馈记录</p>
+                        <button class="btn btn-primary" onclick="window.location.href='login.html'">去登录</button>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/profile/feedbacks`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    renderFeedbackHistory(data || []);
+                } else if (response.status === 401) {
+                    logout();
+                } else {
+                    const error = await response.json();
+                    console.error('加载反馈历史失败:', error);
+                    document.getElementById('feedbackHistoryList').innerHTML = `
+                        <div class="empty-state">
+                            <div style="font-size: 60px; margin-bottom: 20px;">❌</div>
+                            <p>加载失败: ${error.error || '未知错误'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('加载反馈历史失败:', error);
+                document.getElementById('feedbackHistoryList').innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">❌</div>
+                        <p>加载失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 渲染反馈历史
+        function renderFeedbackHistory(feedbacks) {
+            const container = document.getElementById('feedbackHistoryList');
+
+            if (feedbacks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 60px; margin-bottom: 20px;">📬</div>
+                        <p>暂无反馈记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const typeLabels = {
+                'suggestion': '功能建议',
+                'bug': '问题反馈',
+                'other': '其他'
+            };
+
+            container.innerHTML = feedbacks.map(feedback => `
+                <div class="feedback-card">
+                    <div class="feedback-card-header">
+                        <div class="feedback-card-type">${typeLabels[feedback.type] || '其他'}</div>
+                        <div class="feedback-card-date">${formatDate(feedback.created_at)}</div>
+                    </div>
+                    <div class="feedback-card-content">${escapeHtml(feedback.content)}</div>
+                    ${feedback.reply ? `
+                        <div class="feedback-card-reply">
+                            <div class="reply-header">
+                                <span class="reply-label">📝 管理员回复:</span>
+                                <span class="reply-date">${formatDate(feedback.replied_at)}</span>
+                            </div>
+                            <div class="reply-content">${escapeHtml(feedback.reply)}</div>
+                        </div>
+                    ` : `
+                        <div class="feedback-card-status" style="color: #ff9800; font-size: 14px; margin-top: 10px;">
+                            ⏳ 等待管理员回复
+                        </div>
+                    `}
+                </div>
+            `).join('');
+        }
+
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

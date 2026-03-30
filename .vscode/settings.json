@@ -1,0 +1,34 @@
+{
+    "python.linting.enabled": false,
+    "python.linting.pylintEnabled": false,
+    "python.linting.pycodestyleEnabled": false,
+    "python.linting.mypyEnabled": false,
+    "python.linting.flake8Enabled": false,
+    "python.languageServer": "Pylance",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportGeneralTypeIssues": "none",
+        "reportOptionalMemberAccess": "none",
+        "reportOptionalSubscript": "none",
+        "reportMissingParameterType": "none",
+        "reportUnknownParameterType": "none",
+        "reportUnknownArgumentType": "none",
+        "reportUnannotatedClassAttribute": "none",
+        "reportAny": "none",
+        "reportUnusedCallResult": "none",
+        "reportDeprecated": "none",
+        "reportOperatorIssue": "none",
+        "reportCallIssue": "none",
+        "reportAttributeAccessIssue": "none"
+    },
+    "files.associations": {
+        "*.html": "html",
+        "*.css": "css",
+        "*.js": "javascript"
+    },
+    "editor.tabSize": 4,
+    "python.formatting.provider": "black",
+    "[python]": {
+        "editor.formatOnSave": true
+    }
+}
