@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (authToken || localStorage.getItem('authToken')) {
         startChatRefreshTimer();
     }
+
+    // 初始化固定返回按钮的滚动隐藏效果
+    initScrollHideBackBtn();
 });
 
 // 启动聊天刷新定时器
@@ -29,6 +32,36 @@ function stopChatRefreshTimer() {
         clearInterval(chatRefreshInterval);
         chatRefreshInterval = null;
     }
+}
+
+// 初始化固定返回按钮的滚动隐藏效果
+function initScrollHideBackBtn() {
+    const backBtn = document.querySelector('.fixed-back-btn');
+    if (!backBtn) return;
+
+    let lastScrollY = window.scrollY;
+    let scrollTimeout;
+
+    window.addEventListener('scroll', () => {
+        const currentScrollY = window.scrollY;
+
+        // 清除之前的超时
+        clearTimeout(scrollTimeout);
+
+        // 使用防抖，避免频繁切换
+        scrollTimeout = setTimeout(() => {
+            // 向下滚动超过100px时隐藏按钮
+            if (currentScrollY > 100 && currentScrollY > lastScrollY) {
+                backBtn.classList.add('hidden');
+            }
+            // 向上滚动或回到顶部时显示按钮
+            else if (currentScrollY < lastScrollY || currentScrollY < 50) {
+                backBtn.classList.remove('hidden');
+            }
+        }, 100);
+
+        lastScrollY = currentScrollY;
+    });
 }
 
 // 将base64图片转换为data URI格式
@@ -149,8 +182,7 @@ async function loadPageItems(type) {
                 <h3>${escapeHtml(item.title)}</h3>
                 <div class="item-meta">
                     <span>📍 ${escapeHtml(item.location)}</span>
-                    <span>📂 ${escapeHtml(item.category)}</span>
-                    <span>🕐 ${formatTime(item.created_at)}</span>
+                    <span>👤 ${escapeHtml(item.username || '未知')}</span>
                 </div>
                 <div class="item-description">${escapeHtml(item.description)}</div>
                 <div class="item-stats">
@@ -159,9 +191,6 @@ async function loadPageItems(type) {
                     <span class="item-status status-${item.status}">
                         ${getStatusText(item.status)}
                     </span>
-                </div>
-                <div class="item-contact">
-                    <strong>联系方式:</strong> ${escapeHtml(item.contact)}
                 </div>
             </div>
         `).join('');
@@ -876,8 +905,8 @@ function displayItems(items) {
             </div>
 
             <div class="item-info">
-                <span>📞</span>
-                <span>联系方式：${escapeHtml(item.contact)}</span>
+                <span>👤</span>
+                <span>发布者：${escapeHtml(item.username || '未知')}</span>
             </div>
 
             <div class="item-description">
@@ -1184,12 +1213,29 @@ function previewImages(input, type) {
 
 function renderImagePreview(type) {
     const previewContainer = document.getElementById(`${type}ImagePreview`);
-    previewContainer.innerHTML = uploadedImages[type].map(img => `
-        <div class="image-preview-item">
-            <img src="${img.preview}" alt="预览">
-            <button type="button" class="image-preview-remove" onclick="removeImage('${type}', ${img.id})">✕</button>
-        </div>
-    `).join('');
+    const uploadPlaceholder = document.getElementById(`${type}UploadPlaceholder`);
+
+    if (uploadedImages[type] && uploadedImages[type].length > 0) {
+        // 有图片：隐藏上传提示，显示图片预览
+        if (uploadPlaceholder) {
+            uploadPlaceholder.style.display = 'none';
+        }
+        previewContainer.classList.add('has-images');
+
+        previewContainer.innerHTML = uploadedImages[type].map(img => `
+            <div class="image-preview-item">
+                <img src="${img.preview}" alt="预览">
+                <button type="button" class="image-preview-remove" onclick="removeImage('${type}', ${img.id})">✕</button>
+            </div>
+        `).join('');
+    } else {
+        // 没有图片：显示上传提示，清空预览
+        if (uploadPlaceholder) {
+            uploadPlaceholder.style.display = 'flex';
+        }
+        previewContainer.classList.remove('has-images');
+        previewContainer.innerHTML = '';
+    }
 }
 
 function removeImage(type, imageId) {
@@ -2219,13 +2265,27 @@ async function goToChat(authorId, authorName, itemId, itemTitle) {
         const itemMessage = `【物品信息】\n${itemTitle}\n\n我想联系您关于这个物品的详情。`;
 
         if (result.relationship === 'friend') {
-            // 已经是好友,直接跳转到聊天页面并发送消息
-            // 将物品信息存储到localStorage,聊天页面会读取并发送
-            localStorage.setItem('pendingItemMessage', JSON.stringify({
-                friendId: authorId,
-                message: itemMessage
-            }));
-            window.location.href = `chat.html#chat-${authorId}`;
+            // 已经是好友,先获取完整的物品信息,然后跳转到聊天页面
+            try {
+                const itemResponse = await fetch(`${API_BASE}/items/${itemId}`);
+                if (itemResponse.ok) {
+                    const itemData = await itemResponse.json();
+                    // 将完整的物品信息存储到localStorage
+                    localStorage.setItem('pendingItemInfo', JSON.stringify({
+                        friendId: authorId,
+                        friendName: authorName,
+                        itemId: itemId,
+                        itemTitle: itemTitle,
+                        itemData: itemData  // 存储完整的物品数据
+                    }));
+                    window.location.href = `chat.html#chat-${authorId}`;
+                } else {
+                    alert('获取物品信息失败');
+                }
+            } catch (error) {
+                console.error('获取物品信息失败:', error);
+                alert('获取物品信息失败');
+            }
         } else if (result.relationship === 'pending_sent') {
             // 已发送好友申请
             alert('您已向该用户发送过好友申请,请等待对方通过');
@@ -2245,12 +2305,27 @@ async function goToChat(authorId, authorName, itemId, itemTitle) {
 
                 if (acceptResponse.ok) {
                     alert('已接受好友申请');
-                    // 存储待发送的消息
-                    localStorage.setItem('pendingItemMessage', JSON.stringify({
-                        friendId: authorId,
-                        message: itemMessage
-                    }));
-                    window.location.href = `chat.html#chat-${authorId}`;
+                    // 获取完整的物品信息
+                    try {
+                        const itemResponse = await fetch(`${API_BASE}/items/${itemId}`);
+                        if (itemResponse.ok) {
+                            const itemData = await itemResponse.json();
+                            // 存储完整的物品信息
+                            localStorage.setItem('pendingItemInfo', JSON.stringify({
+                                friendId: authorId,
+                                friendName: authorName,
+                                itemId: itemId,
+                                itemTitle: itemTitle,
+                                itemData: itemData  // 存储完整的物品数据
+                            }));
+                            window.location.href = `chat.html#chat-${authorId}`;
+                        } else {
+                            alert('获取物品信息失败');
+                        }
+                    } catch (error) {
+                        console.error('获取物品信息失败:', error);
+                        alert('获取物品信息失败');
+                    }
                 } else {
                     alert('接受好友申请失败');
                 }

@@ -244,6 +244,246 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
+        /* 物品链接消息卡片样式 */
+        .message-content.item-link-message {
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
+        /* 新的物品卡片样式 */
+        .message-content.item-card-message {
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
+        .item-card {
+            background: white;
+            border: 1px solid #e8eaed;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            max-width: 320px;
+        }
+
+        .item-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .item-card-image {
+            width: 100%;
+            height: 160px;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .item-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-card-info {
+            padding: 12px;
+        }
+
+        .item-card-row {
+            display: flex;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 13px;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .item-card-row:last-child {
+            border-bottom: none;
+        }
+
+        .message.sent .item-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .message.sent .item-card-info .item-card-row {
+            color: rgba(255, 255, 255, 0.95);
+            border-bottom-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 预览卡片样式 */
+        .item-card-preview {
+            background: white;
+            border: 1px solid #e8eaed;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .item-card-preview .item-card-thumbnail {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .item-card-preview .item-card-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-card-preview .item-card-details {
+            padding: 16px;
+        }
+
+        .item-card-preview .item-card-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 14px;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .item-card-preview .item-card-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-link-card {
+            background: white;
+            border: 1px solid #e8eaed;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            max-width: 320px;
+        }
+
+        .item-link-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .item-link-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .item-link-icon {
+            font-size: 20px;
+        }
+
+        .item-link-label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .item-link-body {
+            padding: 16px;
+        }
+
+        .item-link-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-link-question {
+            font-size: 13px;
+            color: #666;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid #ff9500;
+        }
+
+        .item-link-footer {
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .item-link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .item-link-btn:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: scale(1.02);
+        }
+
+        .item-link-btn .arrow {
+            font-size: 16px;
+            transition: transform 0.3s;
+        }
+
+        .item-link-btn:hover .arrow {
+            transform: translateX(3px);
+        }
+
+        .message.sent .item-link-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .message.sent .item-link-header {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .message.sent .item-link-body {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .message.sent .item-link-title {
+            color: #333;
+        }
+
+        .message.sent .item-link-question {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-left-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .message.sent .item-link-footer {
+            background: rgba(255, 255, 255, 0.1);
+            border-top-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .message.sent .item-link-btn {
+            background: white;
+            color: #667eea;
+        }
+
+        .message.sent .item-link-btn:hover {
+            background: #f0f0f0;
+            color: #764ba2;
+        }
+
         .chat-input {
             padding: 15px 20px;
             background: white;
@@ -324,6 +564,25 @@
 
             .chat-back-btn {
                 display: block;
+            }
+
+            /* 物品链接卡片移动端样式 */
+            .item-link-card {
+                max-width: 280px;
+            }
+
+            .item-link-title {
+                font-size: 15px;
+            }
+
+            .item-link-question {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .item-link-btn {
+                font-size: 13px;
+                padding: 9px;
             }
         }
 
@@ -538,6 +797,358 @@
             gap: 10px;
             margin-top: 10px;
         }
+
+        /* 物品链接确认弹窗样式 - 购物网站订单风格 */
+        .item-link-confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .item-link-confirm-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 520px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+            animation: slideIn 0.3s;
+            overflow: hidden;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .item-link-confirm-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .item-link-confirm-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-link-confirm-header .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: white;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .item-link-confirm-header .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .item-link-confirm-body {
+            padding: 24px;
+        }
+
+        /* 订单卡片样式 */
+        .item-order-card {
+            background: #fafbfc;
+            border: 1px solid #e8eaed;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .item-order-header {
+            background: #f5f6f7;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .item-order-header-icon {
+            font-size: 20px;
+        }
+
+        .item-order-header-text {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .item-order-body {
+            padding: 16px;
+        }
+
+        .item-order-info {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .item-order-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .item-order-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-order-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-order-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .item-order-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .item-order-desc {
+            padding: 12px;
+            background: white;
+            border: 1px solid #e8eaed;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .item-order-tip {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #fff4e5 0%, #ffedd5 100%);
+            border-left: 4px solid #ff9500;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .item-order-tip-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .item-link-confirm-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .item-link-confirm-actions .btn {
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            min-width: 100px;
+        }
+
+        .item-link-confirm-actions .btn-secondary {
+            background: #f5f6f7;
+            color: #333;
+            border: 1px solid #e8eaed;
+        }
+
+        .item-link-confirm-actions .btn-secondary:hover {
+            background: #e8eaed;
+            border-color: #d0d3d6;
+        }
+
+        .item-link-confirm-actions .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .item-link-confirm-actions .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 旧版样式保留用于兼容 */
+        .item-preview {
+            display: none;
+        }
+
+        /* 移动端响应式优化 */
+        @media (max-width: 768px) {
+            .item-link-confirm-content {
+                width: 95%;
+                max-width: 500px;
+            }
+
+            .item-link-confirm-header,
+            .item-link-confirm-body {
+                padding: 16px;
+            }
+
+            .item-link-confirm-header h3 {
+                font-size: 16px;
+            }
+
+            .item-order-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 28px;
+            }
+
+            .item-order-title {
+                font-size: 15px;
+            }
+
+            .item-order-meta {
+                gap: 12px;
+                font-size: 12px;
+            }
+
+            .item-order-desc,
+            .item-order-tip {
+                font-size: 13px;
+            }
+
+            .item-link-confirm-actions .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+                min-width: 80px;
+            }
+        }
+
+        /* 小屏幕手机优化 */
+        @media (max-width: 480px) {
+            .item-link-confirm-content {
+                width: 100%;
+                border-radius: 0;
+            }
+
+            .item-order-info {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .item-order-icon {
+                width: 100%;
+                height: 80px;
+                font-size: 36px;
+            }
+
+            .item-link-confirm-actions {
+                flex-direction: column-reverse;
+            }
+
+            .item-link-confirm-actions .btn {
+                width: 100%;
+            }
+
+            /* 物品链接卡片小屏幕样式 */
+            .item-link-card {
+                max-width: 100%;
+            }
+
+            .item-link-header {
+                padding: 10px 12px;
+            }
+
+            .item-link-icon {
+                font-size: 18px;
+            }
+
+            .item-link-label {
+                font-size: 13px;
+            }
+
+            .item-link-body {
+                padding: 12px;
+            }
+
+            .item-link-title {
+                font-size: 14px;
+                -webkit-line-clamp: 3;
+            }
+
+            .item-link-question {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .item-link-footer {
+                padding: 10px 12px;
+            }
+
+            .item-link-btn {
+                font-size: 13px;
+                padding: 8px 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -553,6 +1164,42 @@
                     <span id="userInfoText"></span>
                 </div>
             </div>
+            <div class="top-right-auth">
+            
+
+            <div class="user-dropdown" id="userDropdown" style="display: none;">
+                <div class="user-dropdown-btn">
+                    <span class="user-icon">👤</span>
+                    <span class="user-name" id="userName">用户名</span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="user-dropdown-menu">
+                    <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                        <span class="dropdown-icon">👤</span>
+                        <span>个人中心</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='chat.html'">
+                        <span class="dropdown-icon">💬</span>
+                        <span>聊天</span>
+                        <span class="notification-badge-small" id="chatBadge" style="display: none;">0</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='notifications.html'">
+                        <span class="dropdown-icon">🔔</span>
+                        <span>消息</span>
+                        <span class="notification-badge-small" id="dropdownNotificationBadge" style="display: none;">0</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                        <span class="dropdown-icon">⚙️</span>
+                        <span>设置</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item danger" onclick="logout()">
+                        <span class="dropdown-icon">🚪</span>
+                        <span>退出登录</span>
+                    </div>
+                </div>
+            </div>
+        </div>
         </header>
 
        
@@ -1037,7 +1684,7 @@
                     if (chatMessages[userId].length > 0) {
                         const lastMsg = chatMessages[userId][chatMessages[userId].length - 1];
                         lastMessages[userId] = {
-                            content: lastMsg.content,
+                            content: lastMsg.content || lastMsg.message || '',
                             created_at: lastMsg.created_at,
                             sender_id: lastMsg.sender_id
                         };
@@ -1071,10 +1718,169 @@
             loadFriends();
 
             // 检查是否有待发送的物品信息消息
-            checkAndSendPendingItemMessage(userId);
+            checkAndShowPendingItemInfo(userId);
         }
 
-        // 检查并发送待发送的物品信息消息
+        // 检查并显示待发送的物品信息确认弹窗
+        async function checkAndShowPendingItemInfo(userId) {
+            try {
+                const pendingItemInfoStr = localStorage.getItem('pendingItemInfo');
+                if (!pendingItemInfoStr) return;
+
+                const pendingItemInfo = JSON.parse(pendingItemInfoStr);
+                if (pendingItemInfo.friendId === userId && pendingItemInfo.itemId) {
+                    // 显示确认弹窗
+                    showItemLinkConfirmModal(pendingItemInfo);
+                }
+            } catch (error) {
+                console.error('处理待发送物品信息失败:', error);
+            }
+        }
+
+        // 显示物品链接发送确认弹窗
+        function showItemLinkConfirmModal(itemInfo) {
+            const modal = document.createElement('div');
+            modal.className = 'item-link-confirm-modal';
+
+            // 构建物品卡片HTML
+            const item = itemInfo.itemData || {};
+            const thumbnail = item.images && item.images.length > 0 ? formatImageUrl(item.images[0]) : '';
+            const createdTime = item.created_at ? formatTimeForCard(item.created_at) : '';
+            const statusText = item.status === 'pending' ? '待认领' : item.status === 'claimed' ? '已认领' : item.status === 'returned' ? '已归还' : item.status || '未知';
+            const statusEmoji = item.status === 'pending' ? '✅' : item.status === 'claimed' ? '🔒' : item.status === 'returned' ? '🔄' : '📋';
+
+            modal.innerHTML = `
+                <div class="item-link-confirm-content">
+                    <div class="item-link-confirm-header">
+                        <h3>📦 发送物品确认</h3>
+                        <button class="close-btn" onclick="closeItemLinkConfirmModal()">×</button>
+                    </div>
+                    <div class="item-link-confirm-body">
+                        <!-- 物品卡片预览 -->
+                        <div class="item-card-preview">
+                            ${thumbnail ? `<div class="item-card-thumbnail"><img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(item.title)}"></div>` : ''}
+                            <div class="item-card-details">
+                                <div class="item-card-row">📍 地点：${escapeHtml(item.location || '未知')}</div>
+                                <div class="item-card-row">⏰ 时间：${escapeHtml(createdTime)}</div>
+                                <div class="item-card-row">🏷️ 类别：${escapeHtml(item.category || '未知')}</div>
+                                <div class="item-card-row">👤 发布人：${escapeHtml(item.username || '未知')}</div>
+                                <div class="item-card-row">📞 联系方式：${escapeHtml(item.contact || '未知')}</div>
+                                <div class="item-card-row">${statusEmoji} 状态：${escapeHtml(statusText)}</div>
+                            </div>
+                        </div>
+                        <div class="item-order-tip">
+                            <span class="item-order-tip-icon">💡</span>
+                            <span>对方可以通过链接查看完整的物品信息（包括图片、描述、地点等）</span>
+                        </div>
+                    </div>
+                    <div class="item-link-confirm-actions">
+                        <button class="btn btn-secondary" onclick="closeItemLinkConfirmModal()">取消</button>
+                        <button class="btn btn-primary" onclick="confirmSendItemLink(${itemInfo.friendId}, ${itemInfo.itemId}, '${escapeHtml(itemInfo.itemTitle)}')">确认发送</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // 格式化时间用于卡片显示
+        function formatTimeForCard(timeStr) {
+            if (!timeStr) return '';
+            const date = new Date(timeStr);
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+
+        // 将base64图片转换为data URI格式
+        function formatImageUrl(base64Data) {
+            if (!base64Data) return '';
+
+            // 检查是否已经是完整的data URI
+            if (base64Data.startsWith('data:image')) {
+                return base64Data;
+            }
+
+            // 检测图片类型
+            let imageType = 'image/jpeg'; // 默认为jpeg
+            if (base64Data.startsWith('/9j/')) {
+                imageType = 'image/jpeg';
+            } else if (base64Data.startsWith('iVBORw0KGgo')) {
+                imageType = 'image/png';
+            } else if (base64Data.startsWith('R0lGODdh') || base64Data.startsWith('R0lGODlh')) {
+                imageType = 'image/gif';
+            } else if (base64Data.startsWith('UklGR')) {
+                imageType = 'image/webp';
+            }
+
+            return `data:${imageType};base64,${base64Data}`;
+        }
+
+        // 关闭物品链接确认弹窗
+        function closeItemLinkConfirmModal() {
+            const modal = document.querySelector('.item-link-confirm-modal');
+            if (modal) {
+                modal.remove();
+            }
+            // 清除待发送的物品信息
+            localStorage.removeItem('pendingItemInfo');
+        }
+
+        // 确认发送物品链接
+        async function confirmSendItemLink(userId, itemId, itemTitle) {
+            try {
+                // 构建物品链接消息
+                const itemLinkMessage = `📦 物品链接：${itemTitle}\n\n物品详情：${window.location.origin}/item-detail.html?id=${itemId}\n\n请问这是您的物品吗？`;
+
+                const response = await fetch(`${API_BASE}/chat/messages/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        receiver_id: userId,
+                        content: itemLinkMessage
+                    })
+                });
+
+                if (response.ok) {
+                    const newMessage = await response.json();
+                    // 将新消息添加到聊天记录中
+                    if (!chatMessages[userId]) {
+                        chatMessages[userId] = [];
+                    }
+                    chatMessages[userId].push(newMessage);
+                    // 更新消息显示
+                    renderMessages(userId);
+                    // 滚动到底部
+                    scrollToBottom();
+                    // 更新最后一条消息
+                    lastMessages[userId] = {
+                        content: newMessage.content || newMessage.message || '',
+                        created_at: newMessage.created_at,
+                        sender_id: newMessage.sender_id
+                    };
+                    // 重新加载好友列表
+                    loadFriends();
+
+                    // 显示成功提示
+                    alert('物品链接已发送！');
+                } else {
+                    alert('发送失败，请重试');
+                }
+            } catch (error) {
+                console.error('发送物品链接失败:', error);
+                alert('发送失败，请重试');
+            } finally {
+                // 关闭弹窗并清除待发送的物品信息
+                closeItemLinkConfirmModal();
+            }
+        }
+
+        // 检查并发送待发送的物品信息消息（保留用于兼容旧版本）
         async function checkAndSendPendingItemMessage(userId) {
             try {
                 const pendingItemMessageStr = localStorage.getItem('pendingItemMessage');
@@ -1082,20 +1888,58 @@
 
                 const pendingItemMessage = JSON.parse(pendingItemMessageStr);
                 if (pendingItemMessage.friendId === userId && pendingItemMessage.message) {
-                    // 自动发送物品信息消息
-                    await sendItemMessage(userId, pendingItemMessage.message);
-                    // 清除待发送的消息
-                    localStorage.removeItem('pendingItemMessage');
+                    // 显示确认弹窗而不是自动发送
+                    const modal = document.createElement('div');
+                    modal.className = 'item-link-confirm-modal';
+                    modal.innerHTML = `
+                        <div class="item-link-confirm-content">
+                            <div class="item-link-confirm-header">
+                                <h3>📦 发送物品信息</h3>
+                                <button class="close-btn" onclick="closeItemLinkConfirmModal()">×</button>
+                            </div>
+                            <div class="item-link-confirm-body">
+                                <div class="item-order-card">
+                                    <div class="item-order-header">
+                                        <span class="item-order-header-icon">📝</span>
+                                        <span class="item-order-header-text">消息预览</span>
+                                    </div>
+                                    <div class="item-order-body">
+                                        <div class="item-order-desc">
+                                            ${escapeHtml(pendingItemMessage.message)}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="item-link-confirm-actions">
+                                    <button class="btn btn-secondary" onclick="closeItemLinkConfirmModal()">取消</button>
+                                    <button class="btn btn-primary" onclick="sendLegacyItemMessage(${pendingItemMessage.friendId}, '${escapeHtml(pendingItemMessage.message)}')">发送</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
                 }
             } catch (error) {
                 console.error('处理待发送物品消息失败:', error);
             }
         }
 
+        // 发送旧格式的物品消息
+        async function sendLegacyItemMessage(userId, message) {
+            try {
+                await sendItemMessage(userId, message);
+            } catch (error) {
+                console.error('发送物品信息失败:', error);
+                alert('发送失败，请重试');
+            } finally {
+                closeItemLinkConfirmModal();
+                localStorage.removeItem('pendingItemMessage');
+            }
+        }
+
         // 发送物品信息消息
         async function sendItemMessage(userId, message) {
             try {
-                const response = await fetch(`${API_BASE}/chat/send`, {
+                const response = await fetch(`${API_BASE}/chat/messages/send`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
@@ -1120,7 +1964,7 @@
                     scrollToBottom();
                     // 更新最后一条消息
                     lastMessages[userId] = {
-                        content: newMessage.content,
+                        content: newMessage.content || newMessage.message || '',
                         created_at: newMessage.created_at,
                         sender_id: newMessage.sender_id
                     };
@@ -1149,11 +1993,86 @@
         // 渲染消息
         function renderMessage(msg, avatar) {
             const isMe = msg.sender_id === currentUser?.id;
+            const content = msg.content || msg.message || '';
+
+            // 尝试解析JSON格式的物品链接消息
+            let itemData = null;
+            try {
+                const parsed = JSON.parse(content);
+                if (parsed.type === 'item_link' && parsed.item) {
+                    itemData = parsed.item;
+                }
+            } catch (e) {
+                // 不是JSON格式,检查是否是旧格式
+                const isItemLink = content.includes('物品链接') && content.includes('物品详情');
+                if (isItemLink) {
+                    const titleMatch = content.match(/物品链接：(.*?)(?=\n|$)/);
+                    const linkMatch = content.match(/物品详情：(.*?)(?=\n|$)/);
+                    const title = titleMatch ? titleMatch[1].trim() : '未知物品';
+                    const link = linkMatch ? linkMatch[1].trim() : '#';
+                    const question = content.includes('请问这是您的物品吗？');
+
+                    return `
+                        <div class="message ${isMe ? 'sent' : 'received'}">
+                            <div class="message-avatar">${isMe ? '👤' : avatar}</div>
+                            <div class="message-content item-link-message">
+                                <div class="item-link-card">
+                                    <div class="item-link-header">
+                                        <span class="item-link-icon">📦</span>
+                                        <span class="item-link-label">物品链接</span>
+                                    </div>
+                                    <div class="item-link-body">
+                                        <div class="item-link-title">${escapeHtml(title)}</div>
+                                        ${question ? '<div class="item-link-question">请问这是您的物品吗？</div>' : ''}
+                                    </div>
+                                    <div class="item-link-footer">
+                                        <a href="${escapeHtml(link)}" class="item-link-btn" target="_blank">
+                                            <span>查看详情</span>
+                                            <span class="arrow">→</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="message-time">${formatMessageTime(msg.created_at)}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // 如果是新格式的物品链接消息,渲染精美的物品卡片
+            if (itemData) {
+                const thumbnail = itemData.images && itemData.images.length > 0 ? formatImageUrl(itemData.images[0]) : '';
+                const createdTime = itemData.created_at ? formatTimeForCard(itemData.created_at) : '';
+                const statusText = itemData.status === 'pending' ? '待认领' : itemData.status === 'claimed' ? '已认领' : itemData.status === 'returned' ? '已归还' : itemData.status || '未知';
+                const statusEmoji = itemData.status === 'pending' ? '✅' : itemData.status === 'claimed' ? '🔒' : itemData.status === 'returned' ? '🔄' : '📋';
+
+                return `
+                    <div class="message ${isMe ? 'sent' : 'received'}">
+                        <div class="message-avatar">${isMe ? '👤' : avatar}</div>
+                        <div class="message-content item-card-message">
+                            <div class="item-card">
+                                ${thumbnail ? `<div class="item-card-image"><img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(itemData.title)}"></div>` : ''}
+                                <div class="item-card-info">
+                                    <div class="item-card-row">📍 地点：${escapeHtml(itemData.location || '未知')}</div>
+                                    <div class="item-card-row">⏰ 时间：${escapeHtml(createdTime)}</div>
+                                    <div class="item-card-row">🏷️ 类别：${escapeHtml(itemData.category || '未知')}</div>
+                                    <div class="item-card-row">👤 发布人：${escapeHtml(itemData.username || '未知')}</div>
+                                    <div class="item-card-row">📞 联系方式：${escapeHtml(itemData.contact || '未知')}</div>
+                                    <div class="item-card-row">${statusEmoji} 状态：${escapeHtml(statusText)}</div>
+                                </div>
+                            </div>
+                            <div class="message-time">${formatMessageTime(msg.created_at)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 普通文本消息
             return `
                 <div class="message ${isMe ? 'sent' : 'received'}">
                     <div class="message-avatar">${isMe ? '👤' : avatar}</div>
                     <div class="message-content">
-                        <div class="message-text">${escapeHtml(msg.content)}</div>
+                        <div class="message-text">${escapeHtml(content)}</div>
                         <div class="message-time">${formatMessageTime(msg.created_at)}</div>
                     </div>
                 </div>
@@ -1192,7 +2111,7 @@
 
                     // 更新最后一条消息
                     lastMessages[currentChatUser.id] = {
-                        content: newMessage.content,
+                        content: newMessage.content || newMessage.message || '',
                         created_at: newMessage.created_at,
                         sender_id: newMessage.sender_id
                     };

@@ -298,6 +298,7 @@
 </head>
 <body>
     <div class="container">
+        <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
         <!-- 置顶搜索统计信息 -->
         <div class="search-stats-fixed" id="searchStatsFixed">
             搜索结果: <span class="stats-highlight" id="fixedSearchKeyword">-</span> | 
@@ -305,8 +306,8 @@
             (物品: <span class="stats-highlight" id="fixedItemsCount">0</span>, 帖子: <span class="stats-highlight" id="fixedPostsCount">0</span>)
         </div>
 
-        <!-- 只保留返回首页按钮 -->
-        <a href="index.html" class="back-to-home-btn" title="返回首页" style="top: 60px;">🏠</a>
+      
+      
 
         <div class="search-results-container">
 
@@ -599,8 +600,7 @@
                     </div>
                     <div class="result-meta">
                         <span>📍 ${escapeHtml(item.location || '-')}</span>
-                        <span>📂 ${escapeHtml(item.category || '-')}</span>
-                        <span>🕐 ${formatTime(item.created_at)}</span>
+                        <span>👤 ${escapeHtml(item.username || '-')}</span>
                     </div>
                     <p class="result-description">${escapeHtml(item.description)}</p>
                     <div class="result-stats">

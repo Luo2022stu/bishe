@@ -51,7 +51,9 @@ header h1 .subtitle {
     display: grid;
     grid-template-columns: 1fr;
     gap: 20px;
-    margin-left: 70px; /* 为左上角纵向导航栏留出空间 */
+    margin-left: 35px; /* 为左上角纵向导航栏留出空间 */
+    max-width: 1400px;
+    width: calc(100% - 70px);
 }
 
 /* 顶部并排区域 */
@@ -70,16 +72,27 @@ header h1 .subtitle {
 .image-upload-area {
     border: 2px dashed #ccc;
     border-radius: 10px;
-    padding: 40px;
+    padding: 10px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s;
     background: #f8f9fa;
+    position: relative;
+    min-height: 200px;
 }
 
 .image-upload-area:hover {
     border-color: #667eea;
     background: #f0f2ff;
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 40px;
 }
 
 .upload-icon {
@@ -100,9 +113,18 @@ header h1 .subtitle {
 
 .image-preview-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
     gap: 10px;
-    margin-top: 15px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+}
+
+/* 当有图片时，预览网格占据整个区域 */
+.image-preview-grid.has-images {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
 }
 
 .image-preview-item {
@@ -264,12 +286,14 @@ header h1 .subtitle {
 .home-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 20px;
+    margin-bottom: 25px;
+    max-width: 1400px;
+    width: 100%;
 }
 
 .home-grid-item {
-    min-height: 280px;
+    min-height: 300px;
     display: flex;
     flex-direction: column;
 }
@@ -957,16 +981,17 @@ header h1 .subtitle {
     .top-sections-row,
     .items-showcase-row {
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 15px;
     }
 
     /* 移动端main-content不需要左边距，因为导航栏已调整 */
     .main-content {
         margin-left: 0;
+        padding: 0 10px;
     }
 
     .home-grid-item {
-        min-height: 250px;
+        min-height: 260px;
     }
 
     /* 左上角返回首页按钮移动端样式 */
@@ -992,9 +1017,10 @@ header h1 .subtitle {
     .notification-section,
     .hot-posts-section,
     .ai-recognition-section,
-    .home-stats-section {
-        padding: 12px;
-        margin-bottom: 10px;
+    .home-stats-section,
+    .items-showcase-section {
+        padding: 15px;
+        margin-bottom: 15px;
     }
 
     .home-layout {
@@ -1223,6 +1249,32 @@ header h1 .subtitle {
 
     .history-meta {
         justify-content: center;
+    }
+}
+
+/* 中等屏幕优化 (769px - 1199px) */
+@media (min-width: 769px) and (max-width: 1199px) {
+    .main-content {
+        max-width: 100%;
+        padding: 0 20px;
+    }
+
+    .home-grid {
+        gap: 18px;
+    }
+
+    .home-grid-item {
+        min-height: 280px;
+    }
+
+    .notification-section,
+    .hot-posts-section,
+    .items-showcase-section {
+        padding: 20px;
+    }
+
+    .home-stats-section {
+        padding: 18px;
     }
 }
 
@@ -1793,7 +1845,7 @@ header h1 .subtitle {
 /* 左上角返回首页按钮 */
 .back-to-home-btn {
     position: fixed;
-    top: 80px;
+    top: 100px;
     left: 15px;
 
     border-radius: 25px;
@@ -2180,22 +2232,48 @@ header h1 .subtitle {
     top: 20px;
     left: 20px;
     z-index: 1000;
-    
-    
     border: none;
     padding: 10px 16px;
     border-radius: 25px;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s;
-    
+    /* 背景跟随主页面 - 半透明渐变 */
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .fixed-back-btn:hover {
-    
     transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.95);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 响应式滚动隐藏效果 - 向下滚动时隐藏按钮 */
+.fixed-back-btn.hidden {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .fixed-back-btn {
+        top: 15px;
+        left: 15px;
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fixed-back-btn {
+        top: 10px;
+        left: 10px;
+        padding: 7px 12px;
+        font-size: 12px;
+    }
 }
 
 .forum-actions {
@@ -3870,6 +3948,11 @@ header h1 .subtitle {
     flex-shrink: 0;
 }
 
+.item-publisher {
+    color: #4b5563;
+    flex-shrink: 0;
+}
+
 .item-stats {
     display: flex;
     gap: 8px;
@@ -4329,6 +4412,21 @@ header h1 .subtitle {
     .admin-sidebar {
         width: 250px;
     }
+
+    /* 首页大屏幕优化 */
+    .home-grid {
+        gap: 20px;
+    }
+
+    .home-grid-item {
+        min-height: 300px;
+    }
+
+    .notification-section,
+    .hot-posts-section,
+    .items-showcase-section {
+        padding: 25px;
+    }
 }
 
 /* 超大屏幕 (>= 1400px) */
@@ -4336,6 +4434,22 @@ header h1 .subtitle {
     .container {
         max-width: 1400px;
     }
+
+    /* 首页超大屏幕优化 */
+    .home-grid {
+        gap: 25px;
+    }
+
+    .home-grid-item {
+        min-height: 320px;
+    }
+
+    .notification-section,
+    .hot-posts-section,
+    .items-showcase-section {
+        padding: 30px;
+    }
+}
 
     .items-list {
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

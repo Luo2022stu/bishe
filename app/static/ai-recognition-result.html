@@ -252,6 +252,10 @@
                             <div class="recognition-label">🔧 识别服务</div>
                             <div class="recognition-value" id="recogService">-</div>
                         </div>
+                        <div class="recognition-item">
+                            <div class="recognition-label">🎯 置信度</div>
+                            <div class="recognition-value" id="recogConfidence">-</div>
+                        </div>
                     </div>
 
                     <!-- 详细描述区域 -->
@@ -344,6 +348,11 @@
             document.getElementById('recogSimpleDescription').textContent = recognitionResult.simple_description || recognitionResult.description || '无描述';
             document.getElementById('recogService').textContent = recognitionResult.service || 'AI服务';
 
+            // 显示置信度
+            const confidence = recognitionResult.confidence || 0;
+            const confidencePercent = Math.round(confidence * 100);
+            document.getElementById('recogConfidence').textContent = `${confidencePercent}%`;
+
             // 显示OCR识别的文字
             if (recognitionResult.ocr_text) {
                 document.getElementById('ocrSection').style.display = 'block';
@@ -405,12 +414,18 @@
                                 }
                             }
 
+                            // 确保匹配度不低于0%
+                            if (score < 5) {
+                                score = 5;  // 最低5%的匹配度,避免显示0%
+                                matchReasons.push('系统推荐');
+                            }
+
                             return {
                                 item: item,
                                 score: score,
                                 match_reasons: matchReasons
                             };
-                        }).filter(m => m.score >= 40); // 只保留匹配分数 >= 40 的物品
+                        }); // 移除筛选条件,显示所有匹配的物品,即使匹配度较低
 
                         // 按匹配分数降序排序
                         matchedItems.sort((a, b) => b.score - a.score);

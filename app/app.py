@@ -1402,6 +1402,237 @@ def extract_simple_item_name(keyword):
     return keyword[:4] if len(keyword) > 4 else keyword
 
 
+def generate_detailed_description(keyword, items, ocr_text=None):
+    """
+    基于AI识别结果生成详细的自然语言描述
+    
+    Args:
+        keyword: 主要识别关键词
+        items: AI识别返回的所有结果列表
+        ocr_text: OCR识别的文字（可选）
+    
+    Returns:
+        详细的自然语言描述
+    """
+    if not items:
+        return "未能识别到物品特征，请重新上传更清晰的图片"
+    
+    # 提取主要物品名称
+    main_keyword = keyword if keyword else "未知物品"
+    simple_name = extract_simple_item_name(main_keyword)
+    
+    # 收集所有识别到的关键词（用于提取颜色、形状等特征）
+    all_keywords = []
+    for item in items[:5]:  # 取前5个结果
+        kw = item.get('keyword', '')
+        score = item.get('score', 0)
+        if kw and score > 0.3:  # 只保留置信度较高的
+            all_keywords.append((kw, score))
+    
+    # 提取颜色、形状、材质等特征
+    colors = []
+    shapes = []
+    materials = []
+    patterns = []
+    
+    color_keywords = ['红色', '蓝色', '绿色', '黄色', '黑色', '白色', '紫色', '粉色', 
+                     '橙色', '灰色', '棕色', '透明', '浅色', '深色', '浅绿', '浅蓝',
+                     '浅黄', '浅紫', '浅粉', '彩虹', '多彩']
+    
+    shape_keywords = ['圆形', '方形', '长方形', '椭圆形', '三角形', '圆柱形',
+                     '锥形', '扁形', '高形', '矮形', '弧形']
+    
+    material_keywords = ['塑料', '玻璃', '金属', '木质', '纸质', '布质',
+                        '皮质', '橡胶', '陶瓷', '不锈钢', '铝合金', '硅']
+    
+    pattern_keywords = ['卡通', '印花', '条纹', '格子', '花色', '图案',
+                       '动物', '人物', '植物', '几何', '纯色']
+    
+    for kw, score in all_keywords:
+        kw_lower = kw.lower()
+        for color in color_keywords:
+            if color in kw:
+                colors.append(color)
+        for shape in shape_keywords:
+            if shape in kw:
+                shapes.append(shape)
+        for material in material_keywords:
+            if material in kw:
+                materials.append(material)
+        for pattern in pattern_keywords:
+            if pattern in kw:
+                patterns.append(pattern)
+    
+    # 去重
+    colors = list(set(colors))
+    shapes = list(set(shapes))
+    materials = list(set(materials))
+    patterns = list(set(patterns))
+    
+    # 构建描述
+    description_parts = []
+    
+    # 添加主物品名称
+    description_parts.append(f"这是一个{simple_name}")
+    
+    # 添加颜色描述
+    if colors:
+        if len(colors) == 1:
+            description_parts.append(f"颜色为{colors[0]}")
+        else:
+            description_parts.append(f"色彩为{', '.join(colors)}")
+    
+    # 添加材质描述
+    if materials:
+        if len(materials) == 1:
+            description_parts.append(f"材质为{materials[0]}")
+        else:
+            description_parts.append(f"主要材质包括{', '.join(materials)}")
+    
+    # 添加形状描述
+    if shapes:
+        if len(shapes) == 1:
+            description_parts.append(f"形状呈{shapes[0]}")
+        else:
+            description_parts.append(f"外形为{shapes[0]}")
+    
+    # 添加图案描述
+    if patterns:
+        if len(patterns) == 1:
+            description_parts.append(f"印有{patterns[0]}图案")
+        else:
+            description_parts.append(f"带有{', '.join(patterns)}图案")
+    
+    # 添加OCR识别的文字
+    if ocr_text and ocr_text.strip():
+        ocr_preview = ocr_text.strip().replace('\n', ' ')
+        if len(ocr_preview) > 30:
+            ocr_preview = ocr_preview[:30] + '...'
+        description_parts.append(f"表面识别到文字信息: {ocr_preview}")
+    
+    # 如果没有提取到任何特征，使用原始关键词
+    if len(description_parts) == 1:
+        # 尝试从原始关键词中提取更多特征
+        if len(main_keyword) > len(simple_name):
+            # 保留额外的描述信息
+            extra_info = main_keyword.replace(simple_name, '').strip()
+            if extra_info:
+                description_parts.append(f"{extra_info}")
+    
+    # 组合成完整的描述
+    detailed_description = '，'.join(description_parts) + '。'
+    
+    # 如果描述太短，补充一些通用描述
+    if len(detailed_description) < 15:
+        detailed_description = f"这是一个{simple_name}，请补充物品的详细特征描述。"
+    
+    return detailed_description
+
+
+def map_category_from_keyword(keyword, items):
+    """
+    根据识别关键词和结果映射到系统分类
+    
+    Args:
+        keyword: 主要关键词
+        items: 所有识别结果
+    
+    Returns:
+        (category, subcategory) 分类和子分类
+    """
+    if not keyword:
+        return '其他', '未分类'
+    
+    keyword_lower = keyword.lower()
+    simple_name = extract_simple_item_name(keyword)
+    simple_name_lower = simple_name.lower()
+    
+    # 电子设备类
+    electronic_items = ['手机', '电脑', '笔记本', '平板', '耳机', '充电器', '手表', '充电宝',
+                        '手机', '电脑', '平板', '耳机', '充电器', 'watch', 'phone', 'laptop',
+                        'keyboard', '鼠标', '鼠标', '音响', '音箱', '音响', 'u盘', '硬盘',
+                        'usb', 'hard', 'disk', '显示器', '键盘', '鼠标']
+    if any(item in keyword_lower for item in electronic_items):
+        if '手机' in simple_name_lower or 'phone' in simple_name_lower:
+            return '电子设备', '手机'
+        elif '电脑' in simple_name_lower or 'laptop' in simple_name_lower or 'notebook' in simple_name_lower:
+            return '电子设备', '电脑'
+        elif '平板' in simple_name_lower or 'ipad' in simple_name_lower or 'tablet' in simple_name_lower:
+            return '电子设备', '平板'
+        elif '耳机' in simple_name_lower or 'earphone' in simple_name_lower or 'headphone' in simple_name_lower:
+            return '电子设备', '耳机'
+        elif '手表' in simple_name_lower or 'watch' in simple_name_lower:
+            return '电子设备', '手表'
+        elif '充电器' in simple_name_lower or 'charger' in simple_name_lower:
+            return '电子设备', '充电器'
+        elif '充电宝' in simple_name_lower or 'power' in simple_name_lower:
+            return '电子设备', '充电宝'
+        else:
+            return '电子设备', '其他'
+    
+    # 证件卡片类
+    document_items = ['身份证', '学生证', '校园卡', '银行卡', '证件', '卡片', '钱包', '证', '卡',
+                     'id', 'card', 'wallet', 'license']
+    if any(item in keyword_lower for item in document_items):
+        if '身份证' in simple_name_lower or 'id' in simple_name_lower:
+            return '证件卡片', '身份证'
+        elif '学生证' in simple_name_lower or '校园卡' in simple_name_lower:
+            return '证件卡片', '学生证'
+        elif '银行卡' in simple_name_lower or 'bank' in simple_name_lower:
+            return '证件卡片', '银行卡'
+        elif '钱包' in simple_name_lower or 'wallet' in simple_name_lower:
+            return '证件卡片', '钱包'
+        else:
+            return '证件卡片', '其他'
+    
+    # 书籍文具类
+    book_items = ['书', '本子', '笔', '文具', '教材', '课本', '笔记本', '书籍', 'pen', 'book',
+                  'notebook', 'pencil', 'ruler', '橡皮', 'eraser']
+    if any(item in keyword_lower for item in book_items):
+        if '书' in simple_name_lower or 'book' in simple_name_lower:
+            return '书籍文具', '书籍'
+        elif '笔' in simple_name_lower or 'pen' in simple_name_lower or 'pencil' in simple_name_lower:
+            return '书籍文具', '文具'
+        else:
+            return '书籍文具', '其他'
+    
+    # 生活用品类
+    daily_items = ['水杯', '杯子', '雨伞', '钥匙', '眼镜', '帽子', '围巾', '口罩', '毛巾',
+                   '梳子', '镜子', '牙刷', '剪刀', '保温杯', '马克杯', '玻璃杯', '塑料杯',
+                   '杯', 'umbrella', 'key', 'glasses', 'hat', 'scarf', 'mask', 'towel']
+    if any(item in keyword_lower for item in daily_items):
+        if '水杯' in simple_name_lower or '杯' in simple_name_lower or 'cup' in simple_name_lower:
+            return '生活用品', '水杯'
+        elif '雨伞' in simple_name_lower or 'umbrella' in simple_name_lower:
+            return '生活用品', '雨伞'
+        elif '钥匙' in simple_name_lower or 'key' in simple_name_lower:
+            return '生活用品', '钥匙'
+        elif '眼镜' in simple_name_lower or 'glasses' in simple_name_lower:
+            return '生活用品', '眼镜'
+        elif '口罩' in simple_name_lower or 'mask' in simple_name_lower:
+            return '生活用品', '口罩'
+        elif '毛巾' in simple_name_lower or 'towel' in simple_name_lower:
+            return '生活用品', '毛巾'
+        else:
+            return '生活用品', '其他'
+    
+    # 服装类
+    clothing_items = ['衣服', '外套', '裤子', '鞋子', '帽子', '围巾', '手套', '袜子',
+                     'shirt', 'pants', 'shoes', 'jacket', 'coat', 'dress', 'clothing']
+    if any(item in keyword_lower for item in clothing_items):
+        if '鞋' in simple_name_lower or 'shoes' in simple_name_lower:
+            return '服装', '鞋子'
+        elif '外套' in simple_name_lower or 'jacket' in simple_name_lower or 'coat' in simple_name_lower:
+            return '服装', '外套'
+        elif '裤子' in simple_name_lower or 'pants' in simple_name_lower:
+            return '服装', '裤子'
+        else:
+            return '服装', '其他'
+    
+    # 默认返回其他
+    return '其他', '未分类'
+
+
 # ============================================================================
 # AI图像识别服务模块
 # ============================================================================
@@ -1436,15 +1667,22 @@ def recognize_with_baidu(image_data):
         
         # 转换为统一格式
         keyword = best_item.get('keyword', '未知物体')
+        confidence = best_item.get('score', 0)
 
         # 提取核心物品名称(只保留2-4个字的核心词)
         simple_name = extract_simple_item_name(keyword)
 
+        # 生成详细描述
+        detailed_description = generate_detailed_description(keyword, items)
+
+        # 映射到系统分类
+        category, subcategory = map_category_from_keyword(keyword, items)
+
         recognition_result = {
-            'category': '其他',
-            'subcategory': '未分类',
-            'description': simple_name,  # 使用简化的物品名称
-            'simple_description': simple_name,  # 添加简化的描述字段
+            'category': category,
+            'subcategory': subcategory,
+            'description': detailed_description,  # 使用详细的自然语言描述
+            'simple_description': simple_name,  # 保留简化的描述字段用于快速搜索
             'suggestions': ['请补充物品的详细描述', '或重新上传更清晰的图片'],
             'details': {
                 'baidu_result': best_item,
@@ -1452,49 +1690,31 @@ def recognize_with_baidu(image_data):
                 'score': best_item.get('score', 0),
                 'original_keyword': keyword  # 保留原始关键词用于参考
             },
-            'confidence': best_item.get('score', 0),
+            'confidence': confidence,
             'ocr_text': None,
             'ocr_details': None
         }
-        
-        # 尝试根据百度AI的root字段映射到我们的分类
-        root = best_item.get('root', '').lower()
-        keyword = best_item.get('keyword', '').lower()
-        
-        # 分类映射（可根据百度AI的返回结果扩展）
-        if '电子设备' in root or '手机' in keyword or '电脑' in keyword or '耳机' in keyword:
-            recognition_result['category'] = '电子设备'
-            recognition_result['subcategory'] = '其他'
-        elif '证件' in root or '卡片' in keyword or '钱包' in keyword:
-            recognition_result['category'] = '证件卡片'
-            recognition_result['subcategory'] = '其他'
-        elif '生活用品' in root or '钥匙' in keyword or '水杯' in keyword:
-            recognition_result['category'] = '生活用品'
-            recognition_result['subcategory'] = '其他'
-        elif '书籍' in root or '文具' in keyword:
-            recognition_result['category'] = '书籍文具'
-            recognition_result['subcategory'] = '其他'
-        elif '服装' in root or '鞋' in keyword or '衣服' in keyword:
-            recognition_result['category'] = '服装'
-            recognition_result['subcategory'] = '其他'
         
         # 2. OCR文字识别（尝试识别图片中的文字）
         try:
             ocr_client = AipOcr(app_id, api_key, secret_key)
             ocr_result = ocr_client.basicGeneral(image_data)
-            
+
             if 'words_result' in ocr_result and ocr_result['words_result']:
                 # 提取所有文字行
                 lines = [item['words'] for item in ocr_result['words_result']]
-                recognition_result['ocr_text'] = '\n'.join(lines)
+                ocr_text = '\n'.join(lines)
+                recognition_result['ocr_text'] = ocr_text
                 recognition_result['ocr_details'] = ocr_result
-                # 如果识别到文字，可以添加到描述或建议中
+
+                # 如果识别到文字，重新生成包含OCR的详细描述
                 if lines:
+                    recognition_result['description'] = generate_detailed_description(keyword, items, ocr_text)
                     recognition_result['suggestions'].append(f'识别到文字: {lines[0][:30]}...')
         except Exception as ocr_error:
             # OCR失败不影响主要结果，仅记录日志
             print(f'[AI识别] 百度OCR识别失败: {ocr_error}')
-        
+
         return recognition_result, None
         
     except ImportError:
@@ -1548,15 +1768,30 @@ def recognize_with_tencent(image_data):
         
         # 转换为统一格式
         keyword = best_label.Name
+        confidence = best_label.Confidence / 100.0  # 腾讯云返回0-100的置信度
 
         # 提取核心物品名称(只保留2-4个字的核心词)
         simple_name = extract_simple_item_name(keyword)
 
+        # 转换labels为统一格式
+        items = []
+        for label in labels[:10]:
+            items.append({
+                'keyword': label.Name,
+                'score': label.Confidence / 100.0
+            })
+
+        # 生成详细描述
+        detailed_description = generate_detailed_description(keyword, items)
+
+        # 映射到系统分类
+        category, subcategory = map_category_from_keyword(keyword, items)
+
         recognition_result = {
-            'category': '其他',
-            'subcategory': '未分类',
-            'description': simple_name,  # 使用简化的物品名称
-            'simple_description': simple_name,  # 添加简化的描述字段
+            'category': category,
+            'subcategory': subcategory,
+            'description': detailed_description,  # 使用详细的自然语言描述
+            'simple_description': simple_name,  # 保留简化的描述字段用于快速搜索
             'suggestions': ['请补充物品的详细描述', '或重新上传更清晰的图片'],
             'details': {
                 'tencent_result': {
@@ -1567,30 +1802,10 @@ def recognize_with_tencent(image_data):
                 },
                 'original_keyword': keyword  # 保留原始关键词用于参考
             },
-            'confidence': best_label.Confidence / 100.0,  # 腾讯云返回0-100的置信度
+            'confidence': confidence,
             'ocr_text': None,
             'ocr_details': None
         }
-        
-        # 尝试根据腾讯云的分类映射到我们的分类
-        first_category = getattr(best_label, 'FirstCategory', '').lower()
-        second_category = getattr(best_label, 'SecondCategory', '').lower()
-        
-        if '电子' in first_category or '电子' in second_category or '手机' in best_label.Name or '电脑' in best_label.Name:
-            recognition_result['category'] = '电子设备'
-            recognition_result['subcategory'] = '其他'
-        elif '证件' in first_category or '卡片' in second_category or '钱包' in best_label.Name:
-            recognition_result['category'] = '证件卡片'
-            recognition_result['subcategory'] = '其他'
-        elif '生活' in first_category or '日常' in second_category or '钥匙' in best_label.Name or '水杯' in best_label.Name:
-            recognition_result['category'] = '生活用品'
-            recognition_result['subcategory'] = '其他'
-        elif '书籍' in first_category or '文具' in second_category:
-            recognition_result['category'] = '书籍文具'
-            recognition_result['subcategory'] = '其他'
-        elif '服装' in first_category or '鞋' in second_category or '衣服' in best_label.Name:
-            recognition_result['category'] = '服装'
-            recognition_result['subcategory'] = '其他'
         
         # 2. OCR文字识别（尝试识别图片中的文字）
         try:
@@ -1613,7 +1828,8 @@ def recognize_with_tencent(image_data):
             if hasattr(ocr_resp, 'TextDetections') and ocr_resp.TextDetections:
                 # 提取所有文字行
                 lines = [item.DetectedText for item in ocr_resp.TextDetections]
-                recognition_result['ocr_text'] = '\n'.join(lines)
+                ocr_text = '\n'.join(lines)
+                recognition_result['ocr_text'] = ocr_text
                 recognition_result['ocr_details'] = {
                     'text_detections': [
                         {
@@ -1624,8 +1840,9 @@ def recognize_with_tencent(image_data):
                         for item in ocr_resp.TextDetections
                     ]
                 }
-                # 如果识别到文字，可以添加到描述或建议中
+                # 如果识别到文字，重新生成包含OCR的详细描述
                 if lines:
+                    recognition_result['description'] = generate_detailed_description(keyword, items, ocr_text)
                     recognition_result['suggestions'].append(f'识别到文字: {lines[0][:30]}...')
         except ImportError:
             # OCR SDK可能未安装或版本不同，忽略
@@ -1711,10 +1928,32 @@ def recognize_with_paddlepaddle(image_data):
         top_class = idx_to_class.get(top_idx, f'class_{top_idx}')
         
         # 转换为统一格式
+        keyword = top_class.replace('_', ' ')
+        confidence = top_prob
+
+        # 提取核心物品名称(只保留2-4个字的核心词)
+        simple_name = extract_simple_item_name(keyword)
+
+        # 转换识别结果为统一格式
+        items = []
+        for idx, prob in zip(top5_indices, top5_probs):
+            class_name = idx_to_class.get(idx.item(), f'class_{idx.item()}').replace('_', ' ')
+            items.append({
+                'keyword': class_name,
+                'score': prob.item()
+            })
+
+        # 生成详细描述
+        detailed_description = generate_detailed_description(keyword, items)
+
+        # 映射到系统分类
+        category, subcategory = map_category_from_keyword(keyword, items)
+
         recognition_result = {
-            'category': '其他',
-            'subcategory': '未分类',
-            'description': top_class.replace('_', ' '),
+            'category': category,
+            'subcategory': subcategory,
+            'description': detailed_description,  # 使用详细的自然语言描述
+            'simple_description': simple_name,  # 保留简化的描述字段用于快速搜索
             'suggestions': ['请补充物品的详细描述', '或重新上传更清晰的图片'],
             'details': {
                 'paddle_result': {
@@ -1724,31 +1963,14 @@ def recognize_with_paddlepaddle(image_data):
                         {'class': idx_to_class.get(idx.item(), f'class_{idx.item()}'), 'confidence': prob.item()}
                         for idx, prob in zip(top5_indices, top5_probs)
                     ]
-                }
+                },
+                'original_keyword': keyword  # 保留原始关键词用于参考
             },
-            'confidence': top_prob,
+            'confidence': confidence,
             'ocr_text': None,
             'ocr_details': None
         }
-        
-        # 尝试根据预测类别映射到系统分类
-        top_class_lower = top_class.lower()
-        if 'phone' in top_class_lower or 'computer' in top_class_lower or 'laptop' in top_class_lower or 'tablet' in top_class_lower or 'headphone' in top_class_lower:
-            recognition_result['category'] = '电子设备'
-            recognition_result['subcategory'] = '其他'
-        elif 'wallet' in top_class_lower or 'card' in top_class_lower or 'id' in top_class_lower or 'passport' in top_class_lower:
-            recognition_result['category'] = '证件卡片'
-            recognition_result['subcategory'] = '其他'
-        elif 'key' in top_class_lower or 'bottle' in top_class_lower or 'cup' in top_class_lower or 'umbrella' in top_class_lower:
-            recognition_result['category'] = '生活用品'
-            recognition_result['subcategory'] = '其他'
-        elif 'book' in top_class_lower or 'notebook' in top_class_lower or 'pen' in top_class_lower:
-            recognition_result['category'] = '书籍文具'
-            recognition_result['subcategory'] = '其他'
-        elif 'clothing' in top_class_lower or 'shoe' in top_class_lower or 'hat' in top_class_lower or 'bag' in top_class_lower:
-            recognition_result['category'] = '服装'
-            recognition_result['subcategory'] = '其他'
-        
+
         return recognition_result, None
         
     except ImportError as e:
@@ -1945,7 +2167,8 @@ def recognize_with_filename(filename, image_data):
     recognition_result = {
         'category': '其他',
         'subcategory': '未分类',
-        'description': '无法识别具体物品',
+        'description': '未知',
+        'simple_description': '未知',  # 添加简化的描述字段
         'suggestions': ['请尝试拍摄更清晰的照片', '可以添加物品描述进行搜索'],
         'details': {},
         'confidence': 0.0
@@ -2018,7 +2241,8 @@ def recognize_with_filename(filename, image_data):
             recognition_result = {
                 'category': '证件卡片',
                 'subcategory': '钱包/卡包',
-                'description': '证件卡片类物品',
+                'description': '钱包',
+                'simple_description': '钱包',  # 添加简化的描述字段
                 'suggestions': ['请描述钱包的颜色、品牌、内部物品数量', '是否有挂饰或特殊标记'],
                 'details': {'type': '钱包/卡包'},
                 'confidence': 0.7
@@ -2027,7 +2251,8 @@ def recognize_with_filename(filename, image_data):
             recognition_result = {
                 'category': '证件卡片',
                 'subcategory': '证件',
-                'description': '重要证件',
+                'description': '身份证',
+                'simple_description': '身份证',  # 添加简化的描述字段
                 'suggestions': ['请描述证件类型', '姓名是否可见', '是否有封面'],
                 'details': {'type': '证件'},
                 'confidence': 0.8
@@ -2036,7 +2261,8 @@ def recognize_with_filename(filename, image_data):
             recognition_result = {
                 'category': '证件卡片',
                 'subcategory': '银行卡',
-                'description': '银行卡类物品',
+                'description': '银行卡',
+                'simple_description': '银行卡',  # 添加简化的描述字段
                 'suggestions': ['请描述银行卡发卡行', '卡面颜色'],
                 'details': {'type': '银行卡'},
                 'confidence': 0.7
@@ -2060,49 +2286,38 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '电子设备',
             'subcategory': '手机',
-            'description': desc,
+            'description': '手机',
+            'simple_description': '手机',  # 添加简化的描述字段
             'suggestions': ['请描述手机品牌、型号', '颜色', '是否有手机壳或贴膜', '屏幕是否完好'],
             'details': {'brand': brand, 'model': model, 'color': color, 'type': '手机'},
             'confidence': 0.8
         }
     elif any(keyword in filename or keyword in filename_clean for keyword in ['电脑', 'laptop', 'notebook', 'macbook', '笔记本']):
-        desc = '笔记本电脑'
-        if brand:
-            desc = f'{brand}笔记本电脑'
-            if model:
-                desc = f'{brand} {model}笔记本电脑'
         recognition_result = {
             'category': '电子设备',
             'subcategory': '电脑',
-            'description': desc,
+            'description': '电脑',
+            'simple_description': '电脑',  # 添加简化的描述字段
             'suggestions': ['请描述电脑品牌、型号', '颜色', '贴纸或贴膜情况', '尺寸大小'],
             'details': {'brand': brand, 'model': model, 'color': color, 'type': '笔记本电脑'},
             'confidence': 0.8
         }
     elif any(keyword in filename or keyword in filename_clean for keyword in ['平板', 'ipad', 'tablet', 'pad']):
-        desc = '平板电脑'
-        if brand:
-            desc = f'{brand}平板电脑'
-            if model:
-                desc = f'{brand} {model}平板电脑'
         recognition_result = {
             'category': '电子设备',
             'subcategory': '平板电脑',
-            'description': desc,
+            'description': '平板',
+            'simple_description': '平板',  # 添加简化的描述字段
             'suggestions': ['请描述平板品牌、尺寸', '颜色', '是否有保护套'],
             'details': {'brand': brand, 'model': model, 'color': color, 'type': '平板电脑'},
             'confidence': 0.8
         }
     elif any(keyword in filename or keyword in filename_clean for keyword in ['耳机', 'earphone', 'headphone', 'airpods', '索尼']):
-        desc = '耳机'
-        if brand:
-            desc = f'{brand}耳机'
-            if model:
-                desc = f'{brand} {model}耳机'
         recognition_result = {
             'category': '电子设备',
             'subcategory': '耳机',
-            'description': desc,
+            'description': '耳机',
+            'simple_description': '耳机',  # 添加简化的描述字段
             'suggestions': ['请描述耳机品牌、型号', '颜色', '有线或无线', '左/右耳机或完整'],
             'details': {'brand': brand, 'model': model, 'color': color, 'type': '耳机'},
             'confidence': 0.7
@@ -2111,19 +2326,18 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '电子设备',
             'subcategory': '充电配件',
-            'description': '充电器或数据线',
+            'description': '充电器',
+            'simple_description': '充电器',  # 添加简化的描述字段
             'suggestions': ['请描述设备类型（安卓/苹果/Type-C）', '品牌', '长度'],
             'details': {'type': '充电配件'},
             'confidence': 0.6
         }
     elif any(keyword in filename or keyword in filename_clean for keyword in ['手表', 'watch', '手环', 'band']):
-        desc = '智能手表或手环'
-        if brand:
-            desc = f'{brand}智能手表'
         recognition_result = {
             'category': '电子设备',
             'subcategory': '智能穿戴',
-            'description': desc,
+            'description': '手表',
+            'simple_description': '手表',  # 添加简化的描述字段
             'suggestions': ['请描述品牌、型号', '颜色', '表带材质'],
             'details': {'brand': brand, 'model': model, 'color': color, 'type': '智能穿戴'},
             'confidence': 0.7
@@ -2132,7 +2346,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '电子设备',
             'subcategory': '充电设备',
-            'description': '充电宝/移动电源',
+            'description': '充电宝',
+            'simple_description': '充电宝',  # 添加简化的描述字段
             'suggestions': ['请描述容量大小', '品牌', '颜色', '接口类型（USB/Type-C）'],
             'details': {'type': '充电宝/移动电源'},
             'confidence': 0.7
@@ -2141,7 +2356,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '电子设备',
             'subcategory': '存储设备',
-            'description': 'U盘/闪存盘',
+            'description': 'U盘',
+            'simple_description': 'U盘',  # 添加简化的描述字段
             'suggestions': ['请描述容量大小', '品牌', '颜色', '接口类型（USB 2.0/3.0）'],
             'details': {'type': 'U盘/闪存盘'},
             'confidence': 0.7
@@ -2150,7 +2366,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '电子设备',
             'subcategory': '存储设备',
-            'description': '硬盘/移动硬盘',
+            'description': '硬盘',
+            'simple_description': '硬盘',  # 添加简化的描述字段
             'suggestions': ['请描述容量大小', '品牌', '类型（机械/固态）', '接口类型'],
             'details': {'type': '硬盘/移动硬盘'},
             'confidence': 0.7
@@ -2164,7 +2381,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '电子设备',
             'subcategory': '电脑外设',
-            'description': desc,
+            'description': '鼠标',
+            'simple_description': '鼠标',  # 添加简化的描述字段
             'suggestions': ['请描述品牌、型号', '颜色', '有线或无线', '是否有特殊功能'],
             'details': {'type': desc},
             'confidence': 0.7
@@ -2173,7 +2391,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '电子设备',
             'subcategory': '摄像设备',
-            'description': '摄像头/相机',
+            'description': '相机',
+            'simple_description': '相机',  # 添加简化的描述字段
             'suggestions': ['请描述品牌、型号', '类型（网络摄像头/数码相机）', '颜色'],
             'details': {'type': '摄像头/相机'},
             'confidence': 0.7
@@ -2184,7 +2403,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '书籍文具',
             'subcategory': '书籍',
-            'description': '书籍类物品',
+            'description': '书籍',
+            'simple_description': '书籍',  # 添加简化的描述字段
             'suggestions': ['请描述书名、作者', '出版社', '封面颜色', '是否有笔记或标记'],
             'details': {'type': '书籍'},
             'confidence': 0.7
@@ -2193,7 +2413,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '书籍文具',
             'subcategory': '文具',
-            'description': '文具类物品',
+            'description': '文具',
+            'simple_description': '文具',  # 添加简化的描述字段
             'suggestions': ['请描述文具类型和数量', '品牌', '颜色', '是否有包装'],
             'details': {'type': '文具'},
             'confidence': 0.6
@@ -2202,7 +2423,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '书籍文具',
             'subcategory': '包袋',
-            'description': '包类物品',
+            'description': '背包',
+            'simple_description': '背包',  # 添加简化的描述字段
             'suggestions': ['请描述包的类型、大小', '颜色和品牌', '是否有挂饰', '内部物品'],
             'details': {'type': '包袋'},
             'confidence': 0.7
@@ -2213,7 +2435,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '生活用品',
             'subcategory': '钥匙',
-            'description': '钥匙类物品',
+            'description': '钥匙',
+            'simple_description': '钥匙',  # 添加简化的描述字段
             'suggestions': ['请描述钥匙的类型（宿舍/教室/车钥匙）', '数量', '是否有钥匙扣或挂饰', '品牌特征'],
             'details': {'type': '钥匙'},
             'confidence': 0.7
@@ -2222,7 +2445,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '生活用品',
             'subcategory': '水杯',
-            'description': '水杯类物品',
+            'description': '水杯',
+            'simple_description': '水杯',  # 添加简化的描述字段
             'suggestions': ['请描述水杯的材质', '颜色和图案', '品牌', '容量大小'],
             'details': {'type': '水杯'},
             'confidence': 0.6
@@ -2231,7 +2455,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '生活用品',
             'subcategory': '雨伞',
-            'description': '雨伞类物品',
+            'description': '雨伞',
+            'simple_description': '雨伞',  # 添加简化的描述字段
             'suggestions': ['请描述雨伞颜色和图案', '折叠还是长柄', '品牌', '是否有破损'],
             'details': {'type': '雨伞'},
             'confidence': 0.6
@@ -2240,7 +2465,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '生活用品',
             'subcategory': '眼镜',
-            'description': '眼镜类物品',
+            'description': '眼镜',
+            'simple_description': '眼镜',  # 添加简化的描述字段
             'suggestions': ['请描述眼镜的类型（近视/太阳/老花）', '镜框颜色和材质', '品牌', '是否有眼镜盒'],
             'details': {'type': '眼镜'},
             'confidence': 0.7
@@ -2249,7 +2475,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '生活用品',
             'subcategory': '帽子',
-            'description': '帽类物品',
+            'description': '帽子',
+            'simple_description': '帽子',  # 添加简化的描述字段
             'suggestions': ['请描述帽子的类型和颜色', '品牌', '是否有装饰物'],
             'details': {'type': '帽子'},
             'confidence': 0.6
@@ -2258,7 +2485,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '生活用品',
             'subcategory': '配饰',
-            'description': '围巾或手套',
+            'description': '围巾',
+            'simple_description': '围巾',  # 添加简化的描述字段
             'suggestions': ['请描述物品类型', '颜色和图案', '材质', '品牌'],
             'details': {'type': '配饰'},
             'confidence': 0.6
@@ -2268,6 +2496,7 @@ def recognize_with_filename(filename, image_data):
             'category': '生活用品',
             'subcategory': '防护用品',
             'description': '口罩',
+            'simple_description': '口罩',  # 添加简化的描述字段
             'suggestions': ['请描述口罩类型（医用/普通）', '颜色', '品牌', '是否有独立包装'],
             'details': {'type': '口罩'},
             'confidence': 0.8
@@ -2276,7 +2505,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '生活用品',
             'subcategory': '卫生用品',
-            'description': '纸巾/湿巾',
+            'description': '纸巾',
+            'simple_description': '纸巾',  # 添加简化的描述字段
             'suggestions': ['请描述纸巾类型（抽纸/手帕纸）', '品牌', '是否有包装'],
             'details': {'type': '纸巾/湿巾'},
             'confidence': 0.7
@@ -2285,21 +2515,21 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '生活用品',
             'subcategory': '卫生用品',
-            'description': '毛巾/浴巾',
+            'description': '毛巾',
+            'simple_description': '毛巾',  # 添加简化的描述字段
             'suggestions': ['请描述毛巾大小', '颜色和图案', '材质', '是否有标签'],
             'details': {'type': '毛巾/浴巾'},
             'confidence': 0.7
         }
     elif any(keyword in filename or keyword in filename_clean for keyword in ['梳子', 'comb', '镜子', 'mirror', '化妆镜']):
-        desc = '梳子或镜子'
-        if '梳子' in filename_clean or 'comb' in filename_clean:
-            desc = '梳子'
-        elif '镜子' in filename_clean or 'mirror' in filename_clean:
+        desc = '梳子'
+        if '镜子' in filename_clean or 'mirror' in filename_clean:
             desc = '镜子'
         recognition_result = {
             'category': '生活用品',
             'subcategory': '个人护理',
             'description': desc,
+            'simple_description': desc,  # 添加简化的描述字段
             'suggestions': ['请描述物品材质', '颜色', '品牌', '是否有包装'],
             'details': {'type': desc},
             'confidence': 0.6
@@ -2308,7 +2538,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '生活用品',
             'subcategory': '个人护理',
-            'description': '牙刷/牙膏',
+            'description': '牙刷',
+            'simple_description': '牙刷',  # 添加简化的描述字段
             'suggestions': ['请描述品牌', '颜色', '是否有包装'],
             'details': {'type': '牙刷/牙膏'},
             'confidence': 0.6
@@ -2317,7 +2548,8 @@ def recognize_with_filename(filename, image_data):
         recognition_result = {
             'category': '生活用品',
             'subcategory': '工具',
-            'description': '剪刀或刀具',
+            'description': '剪刀',
+            'simple_description': '剪刀',  # 添加简化的描述字段
             'suggestions': ['请描述工具类型', '大小', '颜色', '是否有保护套'],
             'details': {'type': '工具'},
             'confidence': 0.6
@@ -2325,39 +2557,31 @@ def recognize_with_filename(filename, image_data):
 
     # 服装类
     elif any(keyword in filename or keyword in filename_clean for keyword in ['衣服', 'cloth', '外套', 'coat', 'jacket', 'shirt', '上衣']):
-        desc = '上衣'
-        if brand:
-            desc = f'{brand}上衣'
         recognition_result = {
             'category': '服装',
             'subcategory': '上衣',
-            'description': desc,
+            'description': '外套',
+            'simple_description': '外套',  # 添加简化的描述字段
             'suggestions': ['请描述衣服的类型（外套/毛衣/T恤等）', '颜色和图案', '品牌', '尺码信息'],
             'details': {'brand': brand, 'color': color, 'type': '上衣'},
             'confidence': 0.7
         }
     elif any(keyword in filename or keyword in filename_clean for keyword in ['裤子', 'pants', 'jean', '短裤', '短']):
-        desc = '裤子'
-        if brand:
-            desc = f'{brand}裤子'
         recognition_result = {
             'category': '服装',
             'subcategory': '下装',
-            'description': desc,
+            'description': '裤子',
+            'simple_description': '裤子',  # 添加简化的描述字段
             'suggestions': ['请描述裤子类型（牛仔裤/休闲裤等）', '颜色', '品牌', '尺码信息'],
             'details': {'brand': brand, 'color': color, 'type': '裤子'},
             'confidence': 0.7
         }
     elif any(keyword in filename or keyword in filename_clean for keyword in ['鞋', 'shoe', '运动鞋', 'sneaker', '皮鞋']):
-        desc = '鞋子'
-        if brand:
-            desc = f'{brand}鞋子'
-            if model:
-                desc = f'{brand} {model}鞋子'
         recognition_result = {
             'category': '服装',
             'subcategory': '鞋类',
-            'description': desc,
+            'description': '鞋子',
+            'simple_description': '鞋子',  # 添加简化的描述字段
             'suggestions': ['请描述鞋子类型和品牌', '颜色', '尺码', '新旧程度', '是否有特殊标识'],
             'details': {'brand': brand, 'model': model, 'color': color, 'type': '鞋子'},
             'confidence': 0.7

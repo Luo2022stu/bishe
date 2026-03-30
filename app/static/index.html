@@ -62,7 +62,6 @@
                 <a href="index.html" class="nav-item active">🏠 首页</a>
                 <a href="found.html" class="nav-item">🔍 失物招领</a>
                 <a href="lost.html" class="nav-item">📢 失物找寻</a>
-                <a href="image-match.html" class="nav-item">🖼️ AI图片匹配</a>
                 <a href="forum.html" class="nav-item">💬 社区交流</a>
                 <a href="locker.html" class="nav-item">📦 智能存储柜</a>
                 <a href="feedback.html" class="nav-item">📝 意见反馈</a>
@@ -143,6 +142,10 @@
                     <a href="items.html" class="quick-btn-simple">
                         <span class="btn-icon">📋</span>
                         <span class="btn-text">查看物品</span>
+                    </a>
+                    <a href="image-match.html" class="quick-btn-simple">
+                        <span class="btn-icon">🤖</span>
+                        <span class="btn-text">AI识别</span>
                     </a>
                     <a href="chat.html" class="quick-btn-simple">
                         <span class="btn-icon">💭</span>
@@ -369,11 +372,11 @@
                             <h4 class="item-title">${escapeHtml(item.title)}</h4>
                             <span class="item-badge lost-badge">找寻</span>
                         </div>
-                        <p class="item-desc">${escapeHtml(item.description.substring(0, 60))}${item.description.length > 60 ? '...' : ''}</p>
                         <div class="item-meta">
                             <span class="item-location">📍 ${escapeHtml(item.location)}</span>
-                            <span class="item-date">${formatDate(item.created_at)}</span>
+                            <span class="item-publisher">👤 ${escapeHtml(item.username || '-')}</span>
                         </div>
+                        <p class="item-desc">${escapeHtml(item.description.substring(0, 60))}${item.description.length > 60 ? '...' : ''}</p>
                     </div>
                 `).join('');
             } catch (error) {

@@ -5,6 +5,236 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>发布失物找寻 - 校园失物招领系统</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* AI识别辅助样式 */
+        .ai-assist-section {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .ai-assist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .ai-assist-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-ai-upload {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-ai-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-ai-upload .btn-icon {
+            font-size: 18px;
+        }
+
+        .ai-result-box {
+            background: white;
+            border: 1px solid #e8eaed;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 15px;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ai-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .ai-result-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .ai-result-confidence {
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .ai-result-content {
+            padding: 16px;
+        }
+
+        .ai-result-item {
+            display: flex;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .ai-result-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .ai-result-label {
+            font-weight: 500;
+            color: #666;
+            min-width: 60px;
+            font-size: 14px;
+        }
+
+        .ai-result-value {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .ai-result-actions {
+            display: flex;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .btn-ai-apply {
+            flex: 1;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-ai-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-ai-close {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            color: #666;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-ai-close:hover {
+            background: #e0e0e0;
+        }
+
+        .ai-loading-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            padding: 20px;
+            margin-top: 15px;
+            background: white;
+            border: 1px solid #e8eaed;
+            border-radius: 8px;
+        }
+
+        .ai-loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f0f0f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .ai-loading-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 移动端响应式 */
+        @media (max-width: 768px) {
+            .ai-assist-section {
+                padding: 15px;
+            }
+
+            .ai-assist-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .btn-ai-upload {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .ai-result-item {
+                flex-direction: column;
+            }
+
+            .ai-result-label {
+                min-width: auto;
+                margin-bottom: 4px;
+            }
+
+            .ai-result-actions {
+                flex-direction: column;
+            }
+
+            .btn-ai-apply,
+            .btn-ai-close {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -20,21 +250,17 @@
                 </div>
             </div>
         </header>
-
-        
-
         <div class="main-content">
             <div class="form-section full">
-                <div class="form-header">
-                    <h2>📝 发布失物找寻信息</h2>
-                    <p class="form-desc">填写以下信息，让更多人帮助您寻找丢失的物品</p>
-                </div>
+               
 
                 <form id="lostForm" class="item-form" onsubmit="handlePublishLost(event)">
                     <div class="form-group">
                         <label for="lostTitle">物品名称 *</label>
                         <input type="text" id="lostTitle" required placeholder="例如：黑色钱包、学生证">
                     </div>
+
+                   
 
                     <div class="form-group">
                         <label for="lostCategory">物品类别 *</label>
@@ -76,19 +302,58 @@
                         <label>物品图片（可选）</label>
                         <div class="image-upload-container">
                             <input type="file" id="lostImage" accept="image/*" multiple onchange="previewImages(this, 'lost')" style="display: none;">
-                            <div class="image-upload-area" onclick="document.getElementById('lostImage').click()">
-                                <div class="upload-icon">📷</div>
-                                <div class="upload-text">点击上传图片</div>
-                                <div class="upload-hint">支持 JPG、PNG、GIF 格式，最多5张</div>
+                            <div class="image-upload-area" id="lostImageUploadArea" onclick="document.getElementById('lostImage').click()">
+                                <div id="lostImagePreview" class="image-preview-grid"></div>
+                                <div class="upload-placeholder" id="lostUploadPlaceholder">
+                                    <div class="upload-icon">📷</div>
+                                    <div class="upload-text">点击上传图片</div>
+                                    <div class="upload-hint">支持 JPG、PNG、GIF 格式，最多5张</div>
+                                </div>
                             </div>
-                            <div id="lostImagePreview" class="image-preview-grid"></div>
                         </div>
                     </div>
-
-                    <div class="form-actions">
+                            
+                             <div class="ai-assist-header">
+                           
+                            <button type="button" class="btn-ai-upload" onclick="recognizeImageFromUploaded('lost')">
+                                <span class="btn-icon">🔮</span>
+                                <span class="btn-text">AI识别已上传图片</span>
+                            </button>
+                        </div>
+                        
+                        <div id="aiLostResult" class="ai-result-box" style="display: none;">
+                            <div class="ai-result-header">
+                                <span class="ai-result-title">识别结果</span>
+                                <span class="ai-result-confidence" id="aiLostConfidence"></span>
+                            </div>
+                            <div class="ai-result-content">
+                                <div class="ai-result-item">
+                                    <span class="ai-result-label">分类：</span>
+                                    <span class="ai-result-value" id="aiLostCategory">-</span>
+                                </div>
+                                <div class="ai-result-item">
+                                    <span class="ai-result-label">描述：</span>
+                                    <span class="ai-result-value" id="aiLostDescription">-</span>
+                                </div>
+                            </div>
+                            <div class="ai-result-actions">
+                                <button type="button" class="btn-ai-apply" onclick="applyAIResult('lost')">应用识别结果</button>
+                                <button type="button" class="btn-ai-close" onclick="closeAIResult('lost')">关闭</button>
+                            </div>
+                        </div>
+                        <div id="aiLostLoading" class="ai-loading-box" style="display: none;">
+                            <div class="ai-loading-spinner"></div>
+                            <span class="ai-loading-text">AI正在识别中...</span>
+                        </div>
+                         <div class="form-actions">
                         <button type="button" class="btn btn-secondary" onclick="window.location.href='lost.html'">取消</button>
                         <button type="submit" class="btn btn-primary">发布</button>
                     </div>
+                        </div>
+                        
+                    </div>
+ 
+                   
                 </form>
             </div>
         </div>
@@ -96,10 +361,204 @@
 
     <script src="script.js"></script>
     <script>
-        // 页面加载时检查登录状态
-        document.addEventListener('DOMContentLoaded', () => {
-            checkLoginStatus();
-        });
+        // AI识别结果存储
+        const aiResults = {
+            lost: null,
+            found: null
+        };
+
+        // AI识别已上传的图片
+        async function recognizeImageFromUploaded(type) {
+            // 检查是否已上传图片
+            if (!uploadedImages[type] || uploadedImages[type].length === 0) {
+                alert('请先在"物品图片"版块上传图片，然后再进行AI识别');
+                return;
+            }
+
+            const loadingBox = document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Loading`);
+            const resultBox = document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Result`);
+
+            // 显示加载中
+            loadingBox.style.display = 'flex';
+
+            try {
+                // 使用第一张已上传的图片进行识别
+                const imageData = uploadedImages[type][0];
+                const formData = new FormData();
+                formData.append('image', imageData.file);
+
+                const response = await fetch('/api/ai/recognize', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    aiResults[type] = result;
+
+                    // 更新结果显示
+                    document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Category`).textContent = result.category || '未识别';
+                    document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Description`).textContent = result.description || '无描述';
+
+                    // 显示置信度
+                    const confidence = result.confidence || 0;
+                    document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Confidence`).textContent =
+                        confidence > 0 ? `置信度: ${confidence.toFixed(1)}%` : '';
+
+                    resultBox.style.display = 'block';
+                } else {
+                    alert('AI识别失败，请重试');
+                }
+            } catch (error) {
+                console.error('AI识别错误:', error);
+                alert('AI识别失败，请检查网络连接');
+            } finally {
+                loadingBox.style.display = 'none';
+            }
+        }
+
+        // 应用AI识别结果
+        function applyAIResult(type) {
+            const result = aiResults[type];
+            if (!result) return;
+
+            const titleInput = document.getElementById(`${type}Title`);
+            const categorySelect = document.getElementById(`${type}Category`);
+            const descriptionTextarea = document.getElementById(`${type}Description`);
+
+            // 1. 应用分类（优先级最高）
+            if (result.category && result.category !== "其他" && result.category !== "未识别") {
+                // 查找匹配的分类选项
+                const options = categorySelect.options;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].value === result.category) {
+                        categorySelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // 2. 应用物品名称（基于识别结果生成更准确的标题）
+            if (!titleInput.value.trim()) {
+                let suggestedTitle = '';
+
+                // 尝试从details中获取更详细的信息
+                if (result.details) {
+                    const brand = result.details.brand || '';
+                    const model = result.details.model || '';
+                    const color = result.details.color || '';
+                    const itemType = result.details.type || result.subcategory || result.description || '';
+
+                    // 构建标题：品牌 + 型号 + 类型 + 颜色
+                    if (brand && model) {
+                        suggestedTitle = `${brand} ${model}`;
+                    } else if (brand) {
+                        suggestedTitle = brand;
+                    } else if (itemType) {
+                        suggestedTitle = itemType;
+                    }
+
+                    // 添加颜色
+                    if (color && suggestedTitle) {
+                        suggestedTitle += ` ${color}色`;
+                    }
+                }
+
+                // 如果没有详细信息，使用简单的描述
+                if (!suggestedTitle) {
+                    suggestedTitle = result.description || result.simple_description || '未知物品';
+                }
+
+                // 限制标题长度
+                if (suggestedTitle.length > 30) {
+                    suggestedTitle = suggestedTitle.substring(0, 30);
+                }
+
+                titleInput.value = suggestedTitle.trim();
+                titleInput.placeholder = '已根据AI识别结果自动生成';
+            }
+
+            // 3. 应用详细描述（更丰富和具体）
+            if (result.description && result.description !== "未知") {
+                let fullDescription = '';
+
+                // 如果有详细信息，构建更完整的描述
+                if (result.details) {
+                    const brand = result.details.brand || '';
+                    const model = result.details.model || '';
+                    const color = result.details.color || '';
+                    const itemType = result.details.type || result.subcategory || '';
+
+                    // 构建描述模板
+                    fullDescription = `${itemType}`;
+
+                    if (brand) {
+                        fullDescription += `\n品牌：${brand}`;
+                    }
+                    if (model) {
+                        fullDescription += `\n型号：${model}`;
+                    }
+                    if (color) {
+                        fullDescription += `\n颜色：${color}色`;
+                    }
+
+                    fullDescription += '\n\n请根据实际情况补充以下信息：';
+                    fullDescription += '\n- 物品的新旧程度';
+                    fullDescription += '\n- 是否有包装或配件';
+                    fullDescription += '\n- 特殊标记或瑕疵';
+                } else {
+                    // 使用简单描述
+                    fullDescription = result.description;
+                }
+
+                // 追加到现有描述或覆盖空描述
+                const currentDesc = descriptionTextarea.value.trim();
+                if (currentDesc) {
+                    // 如果已有描述，询问用户是否替换
+                    if (confirm('检测到已有描述内容，是否用AI识别结果替换？\n\n点击"确定"替换，点击"取消"则追加。')) {
+                        descriptionTextarea.value = fullDescription;
+                    } else {
+                        descriptionTextarea.value = currentDesc + '\n\n' + fullDescription;
+                    }
+                } else {
+                    descriptionTextarea.value = fullDescription;
+                }
+            }
+
+            // 4. 显示建议（如果有）
+            if (result.suggestions && result.suggestions.length > 0) {
+                alert(`AI识别结果已应用！\n\n补充建议：\n${result.suggestions.map((s, i) => `${i + 1}. ${s}`).join('\n')}`);
+            } else {
+                alert('识别结果已应用到表单！');
+            }
+
+            closeAIResult(type);
+        }
+
+        // 关闭AI结果
+        function closeAIResult(type) {
+            const resultBox = document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Result`);
+            resultBox.style.display = 'none';
+        }
+
+        // 页面加载时检查登录状态并自动填充联系方式
+        async function initPage() {
+            await checkLoginStatus();
+            await fetchCurrentUser();
+
+            // 登录后自动填充联系方式
+            if (currentUser && currentUser.phone) {
+                const contactInput = document.getElementById('lostContact');
+                if (contactInput) {
+                    contactInput.value = currentUser.phone;
+                    console.log('[发布] 已自动填充联系方式:', currentUser.phone);
+                }
+            } else {
+                console.log('[发布] 未找到用户联系方式信息', currentUser);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
 
         // 发布成功后跳转回列表页
         const originalPublish = window.handlePublishLost;
