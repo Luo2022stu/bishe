@@ -71,7 +71,57 @@
                     }
                 });
             }
+
+            // 检查是否有待查看的反馈ID（从通知跳转过来的）
+            const params = new URLSearchParams(window.location.search);
+            const feedbackId = params.get('feedback_id');
+            if (feedbackId) {
+                console.log('检测到待查看的反馈ID:', feedbackId);
+                // 清除URL参数
+                window.history.replaceState({}, document.title, window.location.pathname);
+                // 延迟高亮显示反馈，确保反馈列表已加载
+                setTimeout(() => {
+                    highlightFeedback(parseInt(feedbackId));
+                }, 500);
+            }
         });
+
+        // 高亮并滚动到指定反馈
+        function highlightFeedback(feedbackId) {
+            try {
+                // 获取所有反馈卡片
+                const feedbackCards = document.querySelectorAll('.feedback-card');
+                let found = false;
+
+                feedbackCards.forEach((card, index) => {
+                    // 检查卡片是否包含反馈ID
+                    if (card.dataset && card.dataset.feedbackId === feedbackId.toString()) {
+                        found = true;
+                        // 高亮显示
+                        card.style.border = '2px solid #4CAF50';
+                        card.style.backgroundColor = 'rgba(76, 175, 80, 0.05)';
+                        card.style.boxShadow = '0 0 10px rgba(76, 175, 80, 0.3)';
+
+                        // 滚动到该反馈
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                        // 3秒后移除高亮效果
+                        setTimeout(() => {
+                            card.style.border = '';
+                            card.style.backgroundColor = '';
+                            card.style.boxShadow = '';
+                        }, 3000);
+                    }
+                });
+
+                if (!found) {
+                    console.log('未找到反馈ID:', feedbackId);
+                    alert('未找到该反馈记录');
+                }
+            } catch (error) {
+                console.error('高亮反馈失败:', error);
+            }
+        }
 
         // 提交反馈
         async function submitFeedback() {
@@ -183,7 +233,7 @@
             };
 
             container.innerHTML = feedbacks.map(feedback => `
-                <div class="feedback-card">
+                <div class="feedback-card" data-feedback-id="${feedback.id}">
                     <div class="feedback-card-header">
                         <div class="feedback-card-type">${typeLabels[feedback.type] || '其他'}</div>
                         <div class="feedback-card-date">${formatDate(feedback.created_at)}</div>

@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <a href="javascript:history.back()" class="back-to-home-btn" title="返回上一页">←</a>
+         <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
         <div class="main-content">
             <div class="item-detail-container" id="itemDetail">
                 <div class="loading">加载中...</div>
@@ -75,6 +75,7 @@
             const typeText = item.type === 'found' ? '🔍 失物招领' : '📢 失物找寻';
             const locationText = item.type === 'found' ? '发现地点' : '丢失地点';
             const canEdit = currentUser && (currentUser.role === 'admin' || item.user_id === currentUser.id);
+            const isAuthor = currentUser && item.user_id === currentUser.id;
 
             document.getElementById('itemDetail').innerHTML = `
                 <div class="item-detail-card">
@@ -101,10 +102,19 @@
                             <span class="info-label">📂 分类:</span>
                             <span class="info-value">${escapeHtml(item.category)}</span>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">📞 联系方式:</span>
-                            <span class="info-value">${escapeHtml(item.contact)}</span>
-                        </div>
+                        ${!isAuthor ? `
+                            <div class="info-row">
+                                <span class="info-label">💬 联系方式:</span>
+                                <button class="btn btn-small btn-primary" onclick="goToChat(${item.user_id}, '${escapeHtml(item.username)}', ${item.id}, '${escapeHtml(item.title)}')">
+                                    💬 去聊天
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="info-row">
+                                <span class="info-label">📞 联系方式:</span>
+                                <span class="info-value">${escapeHtml(item.contact)}</span>
+                            </div>
+                        `}
                         <div class="info-row">
                             <span class="info-label">📊 状态:</span>
                             <span class="info-value status-${item.status}">${getStatusText(item.status)}</span>

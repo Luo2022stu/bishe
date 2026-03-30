@@ -2187,6 +2187,104 @@ function viewItemDetail(itemId) {
     window.location.href = `item-detail.html?id=${itemId}`;
 }
 
+// 跳转到聊天并发送物品信息
+async function goToChat(authorId, authorName, itemId, itemTitle) {
+    if (!authToken) {
+        alert('请先登录');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    if (currentUser && currentUser.id === authorId) {
+        alert('不能与自己聊天');
+        return;
+    }
+
+    try {
+        // 检查与该用户的好友关系
+        const response = await fetch(`${API_BASE}/user/check-friendship/${authorId}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+
+        if (!response.ok) {
+            alert('无法查询好友关系');
+            return;
+        }
+
+        const result = await response.json();
+
+        // 准备物品信息消息
+        const itemMessage = `【物品信息】\n${itemTitle}\n\n我想联系您关于这个物品的详情。`;
+
+        if (result.relationship === 'friend') {
+            // 已经是好友,直接跳转到聊天页面并发送消息
+            // 将物品信息存储到localStorage,聊天页面会读取并发送
+            localStorage.setItem('pendingItemMessage', JSON.stringify({
+                friendId: authorId,
+                message: itemMessage
+            }));
+            window.location.href = `chat.html#chat-${authorId}`;
+        } else if (result.relationship === 'pending_sent') {
+            // 已发送好友申请
+            alert('您已向该用户发送过好友申请,请等待对方通过');
+            return;
+        } else if (result.relationship === 'pending_received') {
+            // 对方已发送好友申请
+            if (confirm(`对方已向您发送好友申请,是否接受并开始聊天?`)) {
+                // 接受好友申请
+                const acceptResponse = await fetch(`${API_BASE}/friends/accept`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ friendship_id: result.friendship_id })
+                });
+
+                if (acceptResponse.ok) {
+                    alert('已接受好友申请');
+                    // 存储待发送的消息
+                    localStorage.setItem('pendingItemMessage', JSON.stringify({
+                        friendId: authorId,
+                        message: itemMessage
+                    }));
+                    window.location.href = `chat.html#chat-${authorId}`;
+                } else {
+                    alert('接受好友申请失败');
+                }
+            }
+        } else {
+            // 没有好友关系,先发送好友申请
+            if (confirm(`您还未添加 ${authorName} 为好友,是否现在发送好友申请?`)) {
+                const addResponse = await fetch(`${API_BASE}/friends/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ friend_id: authorId })
+                });
+
+                if (addResponse.ok) {
+                    alert('好友申请已发送,请等待对方通过后即可开始聊天');
+                    return;
+                } else {
+                    const errorData = await addResponse.json();
+                    alert(errorData.error || '发送好友申请失败');
+                }
+            }
+        }
+    } catch (error) {
+        console.error('跳转聊天失败:', error);
+        alert('操作失败,请稍后重试');
+    }
+}
+
+
+
+
 
 
 

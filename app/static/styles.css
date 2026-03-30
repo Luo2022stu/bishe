@@ -51,6 +51,7 @@ header h1 .subtitle {
     display: grid;
     grid-template-columns: 1fr;
     gap: 20px;
+    margin-left: 70px; /* 为左上角纵向导航栏留出空间 */
 }
 
 /* 顶部并排区域 */
@@ -959,17 +960,32 @@ header h1 .subtitle {
         gap: 12px;
     }
 
+    /* 移动端main-content不需要左边距，因为导航栏已调整 */
+    .main-content {
+        margin-left: 0;
+    }
+
     .home-grid-item {
         min-height: 250px;
     }
 
     /* 左上角返回首页按钮移动端样式 */
     .back-to-home-btn {
-        top: 10px;
-        left: 10px;
-        width: 36px;
-        height: 36px;
-        font-size: 18px;
+        top: 70px;
+        left: 5px;
+        gap: 15px;
+        padding: 6px;
+        font-size: 24px;
+    }
+
+    .back-to-home-btn .nav-icon {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s;
     }
 
     /* 减少移动端的内边距和间距 */
@@ -1234,6 +1250,26 @@ header h1 .subtitle {
         display: block;
         margin-left: 0;
         margin-top: 2px;
+    }
+
+    /* 小屏幕移动端main-content不需要左边距 */
+    .main-content {
+        margin-left: 0;
+    }
+
+    /* 小屏幕导航栏调整 */
+    .back-to-home-btn {
+        top: 65px;
+        left: 3px;
+        gap: 12px;
+        padding: 5px;
+        font-size: 20px;
+    }
+
+    .back-to-home-btn .nav-icon {
+        width: 26px;
+        height: 26px;
+        font-size: 18px;
     }
 
     /* 导航菜单 */
@@ -1757,9 +1793,9 @@ header h1 .subtitle {
 /* 左上角返回首页按钮 */
 .back-to-home-btn {
     position: fixed;
-    top: 150px;
+    top: 80px;
     left: 15px;
-   
+
     border-radius: 25px;
     display: flex;
     flex-direction: column;
@@ -1768,7 +1804,7 @@ header h1 .subtitle {
     font-size: 30px;
     cursor: pointer;
     transition: all 0.3s;
-    
+
     z-index: 1000;
     border: 2px solid transparent;
     text-decoration: none;

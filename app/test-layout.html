@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>布局测试 - 纵向导航栏不重叠</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 测试辅助样式 */
+        .test-container {
+            border: 2px solid red;
+            background: rgba(255, 0, 0, 0.1);
+        }
+        .test-nav {
+            border: 2px solid blue;
+            background: rgba(0, 0, 255, 0.1);
+        }
+        .test-content {
+            border: 2px solid green;
+            background: rgba(0, 255, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container test-container">
+        <header>
+            <button class="fixed-back-btn" onclick="history.back()">← 返回</button>
+            <div class="back-to-home-btn test-nav">
+                <div class="nav-icon">
+                    <a href="index.html" title="首页">🏠</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="found.html" title="失物招领">🔍</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="lost.html" title="失物找寻">📢</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="forum.html" title="社区论坛">💬</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="locker.html" title="智能存储柜">📦</a>
+                </div>
+                <div class="nav-icon">
+                    <a href="feedback.html" title="意见反馈">📝</a>
+                </div>
+            </div>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🧪 布局测试页面 <span class="subtitle">测试纵向导航栏和内容区域是否重叠</span></h1>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content test-content">
+            <!-- 物品列表区域 -->
+            <div class="items-section">
+                <div class="section-header">
+                    <h2>📋 测试物品列表</h2>
+                    <button class="btn btn-primary">➕ 测试按钮</button>
+                </div>
+                <div class="items-list">
+                    <div class="item-card">
+                        <h3>测试物品1</h3>
+                        <p class="item-meta">📍 地点: 测试地点1</p>
+                        <p class="item-description">这是一个测试物品描述,用于验证布局是否正确。</p>
+                    </div>
+                    <div class="item-card">
+                        <h3>测试物品2</h3>
+                        <p class="item-meta">📍 地点: 测试地点2</p>
+                        <p class="item-description">这是一个测试物品描述,用于验证布局是否正确。</p>
+                    </div>
+                    <div class="item-card">
+                        <h3>测试物品3</h3>
+                        <p class="item-meta">📍 地点: 测试地点3</p>
+                        <p class="item-description">这是一个测试物品描述,用于验证布局是否正确。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

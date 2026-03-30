@@ -31,6 +31,7 @@
                     <button class="filter-btn" data-filter="comment">评论</button>
                     <button class="filter-btn" data-filter="like">点赞</button>
                     <button class="filter-btn" data-filter="reply">回复</button>
+                    <button class="filter-btn" data-filter="feedback">反馈</button>
                     <button class="filter-btn" data-filter="system">系统</button>
                 </div>
                 <div class="notification-actions">
@@ -144,12 +145,13 @@
                         // 管理员只看待审核通知、反馈通知和系统通知
                         allNotifications = data.notifications.filter(n => n.type === 'pending_audit' || n.type === 'feedback' || n.type === 'system');
                     } else {
-                        // 普通用户看所有通知，但将反馈、禁言、待审核类型归纳到系统通知中
+                        // 普通用户看所有通知，但将禁言、待审核类型归纳到系统通知中
                         allNotifications = data.notifications.map(n => {
-                            // 将反馈、禁言、待审核类型改为系统通知类型
-                            if (n.type === 'feedback' || n.type === 'mute' || n.type === 'pending_audit') {
+                            // 将禁言、待审核类型改为系统通知类型
+                            if (n.type === 'mute' || n.type === 'pending_audit') {
                                 return { ...n, type: 'system' };
                             }
+                            // 保留反馈类型,让用户可以看到反馈通知
                             return n;
                         });
                     }
@@ -285,11 +287,16 @@
                     }
                     break;
                 case 'feedback':
-                    // 反馈通知，管理员跳转到管理员后台，普通用户跳转到反馈页面
+                    // 反馈通知，管理员跳转到管理员后台，普通用户跳转到反馈页面并查看详情
                     if (currentUser && currentUser.role === 'admin') {
                         window.location.href = `admin.html#feedbacks`;
                     } else {
-                        window.location.href = `feedback.html`;
+                        // 普通用户跳转到反馈页面，传递反馈ID参数
+                        if (notification.related_id) {
+                            window.location.href = `feedback.html?feedback_id=${notification.related_id}`;
+                        } else {
+                            window.location.href = `feedback.html`;
+                        }
                     }
                     break;
                 case 'mute':

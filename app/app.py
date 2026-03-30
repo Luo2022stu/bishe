@@ -1273,6 +1273,136 @@ def get_stats():
 
 
 # ============================================================================
+# 辅助函数
+# ============================================================================
+
+def extract_simple_item_name(keyword):
+    """
+    从AI识别的关键词中提取核心物品名称(2-4个字)
+    例如: "蓝色保温水杯" -> "水杯", "苹果iPhone14手机" -> "手机"
+    """
+    if not keyword:
+        return '未知'
+
+    # 常见物品名称映射表(完整词 -> 简化词)
+    item_mapping = {
+        # 水杯类
+        '保温杯': '水杯',
+        '玻璃杯': '水杯',
+        '塑料杯': '水杯',
+        '马克杯': '水杯',
+        '保温水杯': '水杯',
+        '水壶': '水杯',
+
+        # 电子设备类
+        '手机': '手机',
+        '智能手机': '手机',
+        '移动电话': '手机',
+        'iPhone': '手机',
+        'iphone': '手机',
+        '苹果手机': '手机',
+        '安卓手机': '手机',
+
+        '笔记本电脑': '电脑',
+        '笔记本': '电脑',
+        '电脑': '电脑',
+        'laptop': '电脑',
+
+        '平板电脑': '平板',
+        'ipad': '平板',
+        'iPad': '平板',
+        '平板': '平板',
+
+        '耳机': '耳机',
+        '头戴式耳机': '耳机',
+        '入耳式耳机': '耳机',
+        'airpods': '耳机',
+        '蓝牙耳机': '耳机',
+
+        '充电器': '充电器',
+        '充电宝': '充电宝',
+        '移动电源': '充电宝',
+
+        # 证件卡片类
+        '身份证': '身份证',
+        '学生证': '学生证',
+        '银行卡': '银行卡',
+        '信用卡': '银行卡',
+        '钱包': '钱包',
+        '卡包': '卡包',
+
+        # 生活用品类
+        '钥匙': '钥匙',
+        '钥匙扣': '钥匙',
+        '雨伞': '雨伞',
+        '雨具': '雨伞',
+        '背包': '背包',
+        '书包': '书包',
+        '手提包': '手提包',
+
+        # 服装类
+        '外套': '外套',
+        '夹克': '外套',
+        '羽绒服': '外套',
+        '大衣': '外套',
+        '上衣': '上衣',
+        '衬衫': '衬衫',
+        'T恤': 'T恤',
+        'tshirt': 'T恤',
+
+        '裤子': '裤子',
+        '长裤': '裤子',
+        '牛仔裤': '裤子',
+
+        '鞋子': '鞋子',
+        '运动鞋': '鞋子',
+        '皮鞋': '鞋子',
+        '靴子': '鞋子',
+
+        # 书籍文具类
+        '书籍': '书籍',
+        '书本': '书籍',
+        '教材': '书籍',
+        '课本': '书籍',
+        '笔记本': '笔记本',
+        '文具': '文具',
+        '笔': '笔',
+    }
+
+    # 检查关键词是否包含映射表中的词汇
+    for full_name, simple_name in item_mapping.items():
+        if full_name.lower() in keyword.lower():
+            return simple_name
+
+    # 如果没有匹配到,尝试提取2-4个字的中文或英文
+    # 移除形容词、颜色等词汇
+    import re
+
+    # 常见颜色和形容词列表
+    adjectives = ['红色', '蓝色', '绿色', '黄色', '黑色', '白色', '灰色', '粉色',
+                  '大', '小', '长', '短', '新', '旧', '好', '坏', '美丽', '漂亮',
+                  '红色', '绿色', '蓝色', '黄色', '黑色', '白色', '紫色', '橙色',
+                  '红', '蓝', '绿', '黄', '黑', '白', '灰', '粉', '紫', '橙']
+
+    # 移除形容词
+    cleaned = keyword
+    for adj in adjectives:
+        cleaned = cleaned.replace(adj, '')
+
+    # 提取2-4个连续的中文字符或英文单词
+    chinese_match = re.search(r'[\u4e00-\u9fa5]{2,4}', cleaned)
+    if chinese_match:
+        return chinese_match.group()
+
+    english_match = re.search(r'[a-zA-Z]{2,10}', cleaned)
+    if english_match:
+        return english_match.group()
+
+    # 如果都没有匹配,返回原始关键词的前4个字符
+    return keyword[:4] if len(keyword) > 4 else keyword
+
+
+# ============================================================================
 # AI图像识别服务模块
 # ============================================================================
 
@@ -1305,15 +1435,22 @@ def recognize_with_baidu(image_data):
         best_item = max(items, key=lambda x: x.get('score', 0))
         
         # 转换为统一格式
+        keyword = best_item.get('keyword', '未知物体')
+
+        # 提取核心物品名称(只保留2-4个字的核心词)
+        simple_name = extract_simple_item_name(keyword)
+
         recognition_result = {
             'category': '其他',
             'subcategory': '未分类',
-            'description': best_item.get('keyword', '未知物体'),
+            'description': simple_name,  # 使用简化的物品名称
+            'simple_description': simple_name,  # 添加简化的描述字段
             'suggestions': ['请补充物品的详细描述', '或重新上传更清晰的图片'],
             'details': {
                 'baidu_result': best_item,
                 'root': best_item.get('root', ''),
-                'score': best_item.get('score', 0)
+                'score': best_item.get('score', 0),
+                'original_keyword': keyword  # 保留原始关键词用于参考
             },
             'confidence': best_item.get('score', 0),
             'ocr_text': None,
@@ -1410,10 +1547,16 @@ def recognize_with_tencent(image_data):
         best_label = max(labels, key=lambda x: x.Confidence)
         
         # 转换为统一格式
+        keyword = best_label.Name
+
+        # 提取核心物品名称(只保留2-4个字的核心词)
+        simple_name = extract_simple_item_name(keyword)
+
         recognition_result = {
             'category': '其他',
             'subcategory': '未分类',
-            'description': best_label.Name,
+            'description': simple_name,  # 使用简化的物品名称
+            'simple_description': simple_name,  # 添加简化的描述字段
             'suggestions': ['请补充物品的详细描述', '或重新上传更清晰的图片'],
             'details': {
                 'tencent_result': {
@@ -1421,7 +1564,8 @@ def recognize_with_tencent(image_data):
                     'confidence': best_label.Confidence,
                     'first_category': best_label.FirstCategory if hasattr(best_label, 'FirstCategory') else '',
                     'second_category': best_label.SecondCategory if hasattr(best_label, 'SecondCategory') else ''
-                }
+                },
+                'original_keyword': keyword  # 保留原始关键词用于参考
             },
             'confidence': best_label.Confidence / 100.0,  # 腾讯云返回0-100的置信度
             'ocr_text': None,
@@ -4873,6 +5017,58 @@ def search_user_by_phone():
         'message': '可以添加为好友'
     })
 
+@app.route('/api/user/check-friendship/<int:user_id>', methods=['GET'])
+@login_required
+def check_friendship(user_id):
+    """检查与指定用户的好友关系"""
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    if not token.startswith('token_'):
+        return jsonify({'error': '未登录'}), 401
+
+    current_user_id = int(token.split('_')[1])
+
+    # 不能检查与自己的关系
+    if user_id == current_user_id:
+        return jsonify({'error': '不能检查与自己的关系'}), 400
+
+    # 检查用户是否存在
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': '用户不存在'}), 404
+
+    # 检查是否已经是好友或有待处理的请求
+    friendship = Friendship.query.filter(
+        ((Friendship.user_id == current_user_id) & (Friendship.friend_id == user_id)) |
+        ((Friendship.user_id == user_id) & (Friendship.friend_id == current_user_id))
+    ).first()
+
+    if friendship:
+        if friendship.status == 'accepted':
+            return jsonify({
+                'relationship': 'friend',
+                'message': '已经是好友',
+                'friendship_id': friendship.id
+            })
+        elif friendship.status == 'pending':
+            if friendship.user_id == current_user_id:
+                return jsonify({
+                    'relationship': 'pending_sent',
+                    'message': '已发送好友申请，等待对方通过',
+                    'friendship_id': friendship.id
+                })
+            else:
+                return jsonify({
+                    'relationship': 'pending_received',
+                    'message': '对方已发送好友申请，请处理',
+                    'friendship_id': friendship.id
+                })
+
+    return jsonify({
+        'relationship': 'none',
+        'message': '可以添加为好友',
+        'friendship_id': None
+    })
+
 @app.route('/api/friends/add', methods=['POST'])
 @login_required
 def add_friend():
@@ -5043,25 +5239,45 @@ def get_friends():
 @app.route('/api/friends/pending', methods=['GET'])
 @login_required
 def get_pending_friend_requests():
-    """获取待处理的好友申请"""
+    """获取待处理的好友申请（包括发给自己的和自己发送的）"""
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
     if not token.startswith('token_'):
         return jsonify({'error': '未登录'}), 401
 
     current_user_id = int(token.split('_')[1])
 
-    # 获取发给自己的待处理申请
-    pending_requests = Friendship.query.filter(
+    # 获取发给自己的待处理申请（别人发给自己的）
+    received_requests = Friendship.query.filter(
         Friendship.friend_id == current_user_id,
         Friendship.status == 'pending'
     ).all()
 
+    # 获取自己发送的待处理申请（等待对方验证）
+    sent_requests = Friendship.query.filter(
+        Friendship.user_id == current_user_id,
+        Friendship.status == 'pending'
+    ).all()
+
     requests = []
-    for f in pending_requests:
+
+    # 处理收到的申请
+    for f in received_requests:
         user = User.query.get(f.user_id)
         if user:
             requests.append({
                 'friendship_id': f.id,
+                'type': 'received',
+                'user': user.to_dict(),
+                'created_at': f.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            })
+
+    # 处理发送的申请
+    for f in sent_requests:
+        user = User.query.get(f.friend_id)
+        if user:
+            requests.append({
+                'friendship_id': f.id,
+                'type': 'sent',
                 'user': user.to_dict(),
                 'created_at': f.created_at.strftime('%Y-%m-%d %H:%M:%S')
             })
