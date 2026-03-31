@@ -386,12 +386,16 @@
             try {
                 // 使用第一张已上传的图片进行识别
                 const imageData = uploadedImages[type][0];
-                const formData = new FormData();
-                formData.append('image', imageData.file);
 
-                const response = await fetch('/api/ai/recognize', {
+                const response = await fetch(`${API_BASE}/ai/image-recognize`, {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: imageData.base64,
+                        ocr_type: 'general'
+                    })
                 });
 
                 if (response.ok) {
@@ -399,8 +403,9 @@
                     aiResults[type] = result;
 
                     // 更新结果显示
-                    document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Category`).textContent = result.category || '未识别';
-                    document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Description`).textContent = result.description || '无描述';
+                    updateAIResultDisplay(type, result);
+                    resultBox.style.display = 'block';
+                } else {
 
                     // 显示置信度
                     const confidence = result.confidence || 0;
@@ -416,6 +421,66 @@
                 alert('AI识别失败，请检查网络连接');
             } finally {
                 loadingBox.style.display = 'none';
+            }
+        }
+
+        // 更新AI识别结果显示
+        function updateAIResultDisplay(type, result) {
+            const prefix = type.charAt(0).toUpperCase() + type.slice(1);
+
+            // 更新商品识别结果
+            if (result.product && result.product.success) {
+                const labels = result.product.labels || [];
+                const recommendedCategory = result.product.recommended_category || '其他';
+                const recommendedTags = result.product.recommended_tags || [];
+
+                // 显示分类
+                const categoryElement = document.getElementById(`ai${prefix}Category`);
+                if (categoryElement) {
+                    categoryElement.textContent = recommendedCategory;
+                }
+
+                // 显示标签
+                const tagsElement = document.getElementById(`ai${prefix}Tags`);
+                if (tagsElement) {
+                    tagsElement.innerHTML = recommendedTags.map(tag => `<span class="ai-tag">${tag}</span>`).join('');
+                }
+            }
+
+            // 更新OCR识别结果
+            if (result.ocr && result.ocr.success) {
+                const ocrType = result.ocr.type;
+                let ocrText = '';
+
+                if (ocrType === 'general' && result.ocr.text_blocks) {
+                    // 通用文字识别
+                    const allText = result.ocr.text_blocks.map(block => block.text).join(' ');
+                    ocrText = `识别到文字：${allText.substring(0, 100)}${allText.length > 100 ? '...' : ''}`;
+                } else if (result.ocr.data) {
+                    // 身份证或名片识别
+                    const data = result.ocr.data;
+                    ocrText = Object.entries(data).map(([key, value]) => `${key}：${value}`).join('\n');
+                }
+
+                const descriptionElement = document.getElementById(`ai${prefix}Description`);
+                if (descriptionElement) {
+                    descriptionElement.textContent = ocrText || '未识别到文字';
+                }
+
+                // 显示提取的学生信息
+                if (result.student_info && Object.keys(result.student_info).length > 0) {
+                    const studentInfoElement = document.getElementById(`ai${prefix}StudentInfo`);
+                    if (studentInfoElement) {
+                        const infoHtml = Object.entries(result.student_info).map(([key, value]) =>
+                            `<div class="ai-result-item">
+                                <span class="ai-result-label">${key}：</span>
+                                <span class="ai-result-value">${value}</span>
+                            </div>`
+                        ).join('');
+                        studentInfoElement.innerHTML = infoHtml;
+                        studentInfoElement.style.display = 'block';
+                    }
+                }
             }
         }
 

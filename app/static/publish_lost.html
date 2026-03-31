@@ -324,7 +324,6 @@
                         <div id="aiLostResult" class="ai-result-box" style="display: none;">
                             <div class="ai-result-header">
                                 <span class="ai-result-title">识别结果</span>
-                                <span class="ai-result-confidence" id="aiLostConfidence"></span>
                             </div>
                             <div class="ai-result-content">
                                 <div class="ai-result-item">
@@ -332,8 +331,17 @@
                                     <span class="ai-result-value" id="aiLostCategory">-</span>
                                 </div>
                                 <div class="ai-result-item">
+                                    <span class="ai-result-label">标签：</span>
+                                    <span class="ai-result-value" id="aiLostTags">-</span>
+                                </div>
+                                <div class="ai-result-item">
                                     <span class="ai-result-label">描述：</span>
                                     <span class="ai-result-value" id="aiLostDescription">-</span>
+                                </div>
+                                <div id="aiLostStudentInfo" style="display: none;">
+                                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #667eea;">
+                                        <div class="ai-result-title" style="margin-bottom: 10px;">📋 识别到的证件信息</div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="ai-result-actions">
@@ -384,12 +392,16 @@
             try {
                 // 使用第一张已上传的图片进行识别
                 const imageData = uploadedImages[type][0];
-                const formData = new FormData();
-                formData.append('image', imageData.file);
 
-                const response = await fetch('/api/ai/recognize', {
+                const response = await fetch(`${API_BASE}/ai/image-recognize`, {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: imageData.base64,
+                        ocr_type: 'general'  // 使用通用OCR识别文字
+                    })
                 });
 
                 if (response.ok) {
@@ -397,14 +409,7 @@
                     aiResults[type] = result;
 
                     // 更新结果显示
-                    document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Category`).textContent = result.category || '未识别';
-                    document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Description`).textContent = result.description || '无描述';
-
-                    // 显示置信度
-                    const confidence = result.confidence || 0;
-                    document.getElementById(`ai${type.charAt(0).toUpperCase() + type.slice(1)}Confidence`).textContent =
-                        confidence > 0 ? `置信度: ${confidence.toFixed(1)}%` : '';
-
+                    updateAIResultDisplay(type, result);
                     resultBox.style.display = 'block';
                 } else {
                     alert('AI识别失败，请重试');
@@ -414,6 +419,66 @@
                 alert('AI识别失败，请检查网络连接');
             } finally {
                 loadingBox.style.display = 'none';
+            }
+        }
+
+        // 更新AI识别结果显示
+        function updateAIResultDisplay(type, result) {
+            const prefix = type.charAt(0).toUpperCase() + type.slice(1);
+
+            // 更新商品识别结果
+            if (result.product && result.product.success) {
+                const labels = result.product.labels || [];
+                const recommendedCategory = result.product.recommended_category || '其他';
+                const recommendedTags = result.product.recommended_tags || [];
+
+                // 显示分类
+                const categoryElement = document.getElementById(`ai${prefix}Category`);
+                if (categoryElement) {
+                    categoryElement.textContent = recommendedCategory;
+                }
+
+                // 显示标签
+                const tagsElement = document.getElementById(`ai${prefix}Tags`);
+                if (tagsElement) {
+                    tagsElement.innerHTML = recommendedTags.map(tag => `<span class="ai-tag">${tag}</span>`).join('');
+                }
+            }
+
+            // 更新OCR识别结果
+            if (result.ocr && result.ocr.success) {
+                const ocrType = result.ocr.type;
+                let ocrText = '';
+
+                if (ocrType === 'general' && result.ocr.text_blocks) {
+                    // 通用文字识别
+                    const allText = result.ocr.text_blocks.map(block => block.text).join(' ');
+                    ocrText = `识别到文字：${allText.substring(0, 100)}${allText.length > 100 ? '...' : ''}`;
+                } else if (result.ocr.data) {
+                    // 身份证或名片识别
+                    const data = result.ocr.data;
+                    ocrText = Object.entries(data).map(([key, value]) => `${key}：${value}`).join('\n');
+                }
+
+                const descriptionElement = document.getElementById(`ai${prefix}Description`);
+                if (descriptionElement) {
+                    descriptionElement.textContent = ocrText || '未识别到文字';
+                }
+
+                // 显示提取的学生信息
+                if (result.student_info && Object.keys(result.student_info).length > 0) {
+                    const studentInfoElement = document.getElementById(`ai${prefix}StudentInfo`);
+                    if (studentInfoElement) {
+                        const infoHtml = Object.entries(result.student_info).map(([key, value]) =>
+                            `<div class="ai-result-item">
+                                <span class="ai-result-label">${key}：</span>
+                                <span class="ai-result-value">${value}</span>
+                            </div>`
+                        ).join('');
+                        studentInfoElement.innerHTML = infoHtml;
+                        studentInfoElement.style.display = 'block';
+                    }
+                }
             }
         }
 
@@ -427,84 +492,62 @@
             const descriptionTextarea = document.getElementById(`${type}Description`);
 
             // 1. 应用分类（优先级最高）
-            if (result.category && result.category !== "其他" && result.category !== "未识别") {
-                // 查找匹配的分类选项
-                const options = categorySelect.options;
-                for (let i = 0; i < options.length; i++) {
-                    if (options[i].value === result.category) {
-                        categorySelect.selectedIndex = i;
-                        break;
+            if (result.product && result.product.success && result.product.recommended_category) {
+                const recommendedCategory = result.product.recommended_category;
+                if (recommendedCategory && recommendedCategory !== '其他' && recommendedCategory !== '未识别') {
+                    // 查找匹配的分类选项
+                    const options = categorySelect.options;
+                    for (let i = 0; i < options.length; i++) {
+                        if (options[i].value === recommendedCategory) {
+                            categorySelect.selectedIndex = i;
+                            break;
+                        }
                     }
                 }
             }
 
-            // 2. 应用物品名称（基于识别结果生成更准确的标题）
-            if (!titleInput.value.trim()) {
-                let suggestedTitle = '';
-
-                // 尝试从details中获取更详细的信息
-                if (result.details) {
-                    const brand = result.details.brand || '';
-                    const model = result.details.model || '';
-                    const color = result.details.color || '';
-                    const itemType = result.details.type || result.subcategory || result.description || '';
-
-                    // 构建标题：品牌 + 型号 + 类型 + 颜色
-                    if (brand && model) {
-                        suggestedTitle = `${brand} ${model}`;
-                    } else if (brand) {
-                        suggestedTitle = brand;
-                    } else if (itemType) {
-                        suggestedTitle = itemType;
-                    }
-
-                    // 添加颜色
-                    if (color && suggestedTitle) {
-                        suggestedTitle += ` ${color}色`;
-                    }
+            // 2. 应用物品名称（基于商品识别结果生成）
+            if (!titleInput.value.trim() && result.product && result.product.labels) {
+                const labels = result.product.labels;
+                if (labels.length > 0) {
+                    const topLabel = labels[0].name;
+                    titleInput.value = topLabel.trim();
+                    titleInput.placeholder = '已根据AI识别结果自动生成';
                 }
-
-                // 如果没有详细信息，使用简单的描述
-                if (!suggestedTitle) {
-                    suggestedTitle = result.description || result.simple_description || '未知物品';
-                }
-
-                // 限制标题长度
-                if (suggestedTitle.length > 30) {
-                    suggestedTitle = suggestedTitle.substring(0, 30);
-                }
-
-                titleInput.value = suggestedTitle.trim();
-                titleInput.placeholder = '已根据AI识别结果自动生成';
             }
 
-            // 3. 应用详细描述（更丰富和具体）
-            if (result.description && result.description !== "未知") {
+            // 3. 应用详细描述（结合OCR识别结果）
+            if (result.ocr && result.ocr.success) {
                 let fullDescription = '';
 
-                // 如果有详细信息，构建更完整的描述
-                if (result.details) {
-                    const brand = result.details.brand || '';
-                    const model = result.details.model || '';
-                    const color = result.details.color || '';
-                    const itemType = result.details.type || result.subcategory || '';
-
-                    // 构建描述模板
-                    fullDescription = `${itemType}`;
-
-                    if (brand) {
-                        fullDescription += `\n品牌：${brand}`;
+                // 如果识别到学生信息，优先使用
+                if (result.student_info && Object.keys(result.student_info).length > 0) {
+                    fullDescription = 'AI识别到的证件信息：\n';
+                    for (const [key, value] of Object.entries(result.student_info)) {
+                        fullDescription += `${key}：${value}\n`;
                     }
-                    if (model) {
-                        fullDescription += `\n型号：${model}`;
-                    }
-                    if (color) {
-                        fullDescription += `\n颜色：${color}色`;
-                    }
+                    fullDescription += '\n请核实信息是否正确，如有误请手动修正。';
+                }
+                // 如果是通用文字识别
+                else if (result.ocr.type === 'general' && result.ocr.text_blocks) {
+                    const allText = result.ocr.text_blocks.map(block => block.text).join('\n');
+                    fullDescription = `AI识别到的文字内容：\n${allText}`;
+                }
+                // 如果有商品标签
+                else if (result.product && result.product.recommended_tags) {
+                    fullDescription = '物品特征标签：' + result.product.recommended_tags.join('、');
+                }
 
-                    fullDescription += '\n\n请根据实际情况补充以下信息：';
-                    fullDescription += '\n- 物品的新旧程度';
-                    fullDescription += '\n- 是否有包装或配件';
+                // 如果描述为空或已有内容，询问用户是否替换
+                if (fullDescription && descriptionTextarea.value.trim()) {
+                    if (confirm('检测到AI识别结果，是否替换当前描述？\n\n' + fullDescription)) {
+                        descriptionTextarea.value = fullDescription;
+                    }
+                } else if (fullDescription) {
+                    descriptionTextarea.value = fullDescription;
+                }
+            }
+        }
                     fullDescription += '\n- 特殊标记或瑕疵';
                 } else {
                     // 使用简单描述

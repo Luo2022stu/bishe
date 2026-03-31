@@ -76,11 +76,15 @@
             const locationText = item.type === 'found' ? '发现地点' : '丢失地点';
             const canEdit = currentUser && (currentUser.role === 'admin' || item.user_id === currentUser.id);
             const isAuthor = currentUser && item.user_id === currentUser.id;
+            const canConfirmPickup = currentUser && !isAuthor && item.type === 'lost';
 
             document.getElementById('itemDetail').innerHTML = `
                 <div class="item-detail-card">
                     <div class="item-detail-header">
                         <span class="item-type">${typeText}</span>
+                        ${isAuthor ? `
+                            <span class="item-badge badge-owner">👤 我发布的</span>
+                        ` : ''}
                         <div class="item-detail-meta">
                             👁️ ${item.view_count} · ❤️ ${item.like_count} · 🕐 ${formatTime(item.created_at)}
                         </div>
@@ -105,8 +109,8 @@
                         ${!isAuthor ? `
                             <div class="info-row">
                                 <span class="info-label">💬 联系方式:</span>
-                                <button class="btn btn-small btn-primary" onclick="goToChat(${item.user_id}, '${escapeHtml(item.username)}', ${item.id}, '${escapeHtml(item.title)}')">
-                                    💬 去聊天
+                                <button class="btn btn-small btn-primary" onclick="sendClaimRequest(${item.id})">
+                                    💬 去认领
                                 </button>
                             </div>
                         ` : `
@@ -457,6 +461,98 @@
             } catch (error) {
                 console.error('举报失败:', error);
                 alert('举报失败，请稍后重试');
+            }
+        }
+
+        // 发送认领请求
+        async function sendClaimRequest(itemId) {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (!currentItem) {
+                alert('物品信息加载中，请稍后重试');
+                return;
+            }
+
+            // 弹出认领留言输入框
+            const message = prompt('请输入认领留言（可选）：', '我想认领这个物品，请确认是否是我丢失的');
+
+            if (message === null) {
+                return; // 用户取消
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/claims`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        item_id: itemId,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('认领请求已发送！发布人确认后您将收到通知。\n\n点击下方按钮可直接与发布人联系：');
+
+                    // 询问是否直接跳转到聊天
+                    if (confirm('是否现在与发布人联系？')) {
+                        window.location.href = `chat.html?user_id=${currentItem.user_id}&item_id=${itemId}`;
+                    }
+                } else {
+                    alert(data.error || '发送认领请求失败');
+                }
+            } catch (error) {
+                console.error('发送认领请求失败:', error);
+                alert('发送认领请求失败，请稍后重试');
+            }
+        }
+
+        // 确认拾取
+        async function confirmPickup(itemId) {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (!confirm('确定要确认拾取该物品吗？\n\n确认后，失主将收到通知。您可以选择：\n1. 与失主联系\n2. 将物品放入智能柜并发送取件码给失主')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/items/${itemId}/pickup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('拾取确认成功！失主将收到通知。\n\n您可以：\n1. 点击下方按钮直接与失主联系\n2. 前往智能柜存放物品并发送取件码');
+
+                    // 询问是否直接跳转到聊天
+                    if (confirm('是否现在与失主联系？')) {
+                        window.location.href = `chat.html?user_id=${currentItem.user_id}&item_id=${itemId}`;
+                    } else if (confirm('是否前往智能柜存放物品？')) {
+                        window.location.href = 'locker.html?item_id=' + itemId;
+                    }
+                } else {
+                    alert(data.error || '确认拾取失败');
+                }
+            } catch (error) {
+                console.error('确认拾取失败:', error);
+                alert('确认拾取失败，请稍后重试');
             }
         }
     </script>

@@ -858,9 +858,20 @@ header h1 .subtitle {
     transition: all 0.3s;
 }
 
+.item-card.my-item {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border-color: #FF9800;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.2);
+}
+
 .item-card:hover {
     border-color: #667eea;
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+}
+
+.item-card.my-item:hover {
+    border-color: #FF9800;
+    box-shadow: 0 5px 20px rgba(255, 152, 0, 0.3);
 }
 
 .item-header {
@@ -891,6 +902,20 @@ header h1 .subtitle {
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
+}
+
+.item-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.badge-owner {
+    background-color: #FF9800;
+    color: white;
 }
 
 .item-info {
@@ -1846,7 +1871,7 @@ header h1 .subtitle {
 .back-to-home-btn {
     position: fixed;
     top: 100px;
-    left: 15px;
+    left: 5px;
 
     border-radius: 25px;
     display: flex;
@@ -2352,6 +2377,7 @@ header h1 .subtitle {
 /* 简单帖子样式（只显示标题） */
 .post-card.simple-post {
     padding: 20px 25px;
+    position: relative;
 }
 
 .post-card.simple-post .post-content,
@@ -2396,6 +2422,35 @@ header h1 .subtitle {
 
 .post-category[data-category="求助"] {
     background: #ff922b;
+}
+
+.post-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.badge-owner-top {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #FF9800;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.post-card.simple-post.my-post {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border: 2px solid #FF9800;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.2);
 }
 
 .post-meta {

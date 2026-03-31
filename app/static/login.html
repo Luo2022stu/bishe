@@ -134,6 +134,23 @@
             window.location.href = 'index.html';
         }
 
+        // 显示登录表单
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('resetPasswordForm').style.display = 'none';
+            // 清空表单
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // 显示注册表单
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('resetPasswordForm').style.display = 'none';
+        }
+
         // 显示重置密码表单
         function showResetPasswordForm() {
             document.getElementById('loginForm').style.display = 'none';
@@ -171,7 +188,12 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('验证码已发送到您的手机');
+                    // 在开发环境中，显示返回的验证码（生产环境应移除此提示）
+                    if (data.code) {
+                        alert(`验证码已发送！\n\n【开发测试用】您的验证码是：${data.code}\n\n（实际部署时，验证码将通过短信发送）`);
+                    } else {
+                        alert('验证码已发送到您的手机');
+                    }
                     // 开始倒计时
                     let countdown = 60;
                     btn.disabled = true;

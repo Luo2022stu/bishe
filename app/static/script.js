@@ -171,8 +171,11 @@ async function loadPageItems(type) {
             return;
         }
 
-        container.innerHTML = filteredItems.map(item => `
-            <div class="item-card clickable" onclick="goToItemDetail('${item.type}', ${item.id}, '${escapeHtml(item.title).replace(/'/g, "\\'")}')">
+        container.innerHTML = filteredItems.map(item => {
+            const isOwner = currentUser && item.user_id === currentUser.id;
+
+            return `
+            <div class="item-card clickable ${isOwner ? 'my-item' : ''}" onclick="goToItemDetail('${item.type}', ${item.id}, '${escapeHtml(item.title).replace(/'/g, "\\'")}')">
                 ${item.images && item.images.length > 0 ? `
                     <div class="item-thumbnail">
                         <img src="${formatImageUrl(item.images[0])}" alt="${escapeHtml(item.title)}" onerror="this.parentElement.style.display='none'">
@@ -193,7 +196,8 @@ async function loadPageItems(type) {
                     </span>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
     } catch (error) {
         console.error('加载物品失败:', error);
         container.innerHTML = `
@@ -880,14 +884,18 @@ function displayItems(items) {
     
     container.innerHTML = items.map(item => {
         const canEdit = currentUser && (currentUser.role === 'admin' || item.user_id === currentUser.id);
+        const isOwner = currentUser && item.user_id === currentUser.id;
         const typeText = item.type === 'found' ? '🔍 失物招领' : '📢 失物找寻';
         const locationText = item.type === 'found' ? '发现地点' : '丢失地点';
 
         return `
-        <div class="item-card clickable" data-item-id="${item.id}" onclick="goToItemDetail('${item.type}', ${item.id}, '${escapeHtml(item.title).replace(/'/g, "\\'")}')">
+        <div class="item-card clickable ${isOwner ? 'my-item' : ''}" data-item-id="${item.id}" onclick="goToItemDetail('${item.type}', ${item.id}, '${escapeHtml(item.title).replace(/'/g, "\\'")}')">
             <div class="item-header">
                 <div class="item-title">${escapeHtml(item.title)}</div>
-                <span class="item-type">${typeText}</span>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="item-type">${typeText}</span>
+                    ${isOwner ? '<span class="item-badge badge-owner">👤 我发布的</span>' : ''}
+                </div>
             </div>
 
             <div class="item-header" style="margin-top: 10px;">

@@ -318,11 +318,17 @@
                     return;
                 }
 
-                container.innerHTML = hotItems.map(item => `
-                    <div class="showcase-item-card" onclick="viewItemDetail(${item.id})">
+                container.innerHTML = hotItems.map(item => {
+                    const isOwner = currentUser && item.user_id === currentUser.id;
+
+                    return `
+                    <div class="showcase-item-card ${isOwner ? 'my-item' : ''}" onclick="viewItemDetail(${item.id})">
                         <div class="item-header">
                             <h4 class="item-title">${escapeHtml(item.title)}</h4>
-                            <span class="item-badge found-badge">招领</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="item-badge found-badge">招领</span>
+                                ${isOwner ? '<span class="item-badge badge-owner">👤 我发布的</span>' : ''}
+                            </div>
                         </div>
                         <p class="item-desc">${escapeHtml(item.description.substring(0, 60))}${item.description.length > 60 ? '...' : ''}</p>
                         <div class="item-meta">
@@ -366,11 +372,17 @@
                     return;
                 }
 
-                container.innerHTML = hotItems.map(item => `
-                    <div class="showcase-item-card" onclick="viewItemDetail(${item.id})">
+                container.innerHTML = hotItems.map(item => {
+                    const isOwner = currentUser && item.user_id === currentUser.id;
+
+                    return `
+                    <div class="showcase-item-card ${isOwner ? 'my-item' : ''}" onclick="viewItemDetail(${item.id})">
                         <div class="item-header">
                             <h4 class="item-title">${escapeHtml(item.title)}</h4>
-                            <span class="item-badge lost-badge">找寻</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="item-badge lost-badge">找寻</span>
+                                ${isOwner ? '<span class="item-badge badge-owner">👤 我发布的</span>' : ''}
+                            </div>
                         </div>
                         <div class="item-meta">
                             <span class="item-location">📍 ${escapeHtml(item.location)}</span>

@@ -942,6 +942,24 @@ def get_items():
 
     return jsonify([item.to_dict() for item in items])
 
+@app.route('/api/items/my-items', methods=['GET'])
+def get_my_items():
+    """获取当前用户发布的物品列表"""
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    if not token or not token.startswith('token_'):
+        return jsonify({'error': '未登录'}), 401
+
+    try:
+        user_id = int(token.split('_')[1])
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': '用户不存在'}), 404
+    except:
+        return jsonify({'error': '无效的token'}), 401
+
+    my_items = LostItem.query.filter_by(user_id=user_id).order_by(LostItem.created_at.desc()).all()
+    return jsonify([item.to_dict() for item in my_items])
+
 @app.route('/api/items', methods=['POST'])
 def create_item():
     try:
@@ -1212,6 +1230,63 @@ def check_item_like_status(item_id):
     ).first()
 
     return jsonify({'liked': existing_like is not None})
+
+@app.route('/api/items/<int:item_id>/pickup', methods=['POST'])
+def confirm_pickup(item_id):
+    """确认拾取失物"""
+    try:
+        token = request.headers.get('Authorization', '').replace('Bearer ', '')
+        if not token or not token.startswith('token_'):
+            return jsonify({'error': '请先登录'}), 401
+
+        finder_id = int(token.split('_')[1])
+        finder = User.query.get(finder_id)
+        if not finder:
+            return jsonify({'error': '用户不存在'}), 404
+
+        # 获取物品信息
+        item = LostItem.query.get_or_404(item_id)
+
+        # 只能拾取失物（lost类型）
+        if item.type != 'lost':
+            return jsonify({'error': '只能确认拾取失物信息'}), 400
+
+        # 不能拾取自己发布的物品
+        if item.user_id == finder_id:
+            return jsonify({'error': '不能拾取自己发布的物品'}), 400
+
+        # 检查是否已经被拾取
+        if item.status != 'pending':
+            return jsonify({'error': '该物品已被拾取'}), 400
+
+        finder_name = finder.username if finder.username else finder.name if finder.name else '用户'
+
+        # 更新物品状态为已拾取
+        item.status = 'claimed'
+
+        # 通知失主
+        notification = UserNotification(
+            user_id=item.user_id,
+            type='pickup',
+            title='物品已被拾取',
+            content=f'用户 {finder_name} 已确认拾取您的物品: {item.title}，请联系对方取回物品',
+            related_id=item.id,
+            related_type='item'
+        )
+        db.session.add(notification)
+
+        db.session.commit()
+
+        return jsonify({
+            'message': '拾取确认成功',
+            'item': item.to_dict()
+        })
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        print(f'确认拾取失败: {e}')
+        print(f'错误堆栈: {traceback.format_exc()}')
+        return jsonify({'error': f'确认拾取失败: {str(e)}'}), 500
 
 @app.route('/api/items/search', methods=['GET'])
 def search_items():
